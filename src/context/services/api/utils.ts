@@ -5,7 +5,7 @@
  * USE_MOCK: Set this to 'false' in your .env file (NEXT_PUBLIC_USE_MOCK=false)
  * to start using real API endpoints instead of mock data.
  */
-export const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true' || true; 
+export const useMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true'; 
 
 /**
  * handleRequest: Wraps API calls to provide a consistent mock/real data toggle.

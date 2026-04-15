@@ -4,7 +4,7 @@ import { Clock, Navigation, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { usePagination } from "../hooks/usePagination";
-import { API_BASE_URL } from "@/services/api-config";
+import { getTripHistory } from "@/context/services/api/personal/history";
 
 export interface ApiHistoryItem {
   trip_id: number;
@@ -34,30 +34,14 @@ export default function HistoryList() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          throw new Error("Vui lòng đăng nhập để xem lịch sử.");
-        }
+        const result = await getTripHistory();
+        const items = Array.isArray(result)
+          ? result
+          : Array.isArray((result as any)?.data)
+            ? (result as any).data
+            : [];
 
-        const response = await fetch(`${API_BASE_URL}/routes/history`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error("Không thể tải lịch sử tìm kiếm.");
-        }
-
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-          setHistoryItems(result.data);
-        } else {
-          setHistoryItems([]);
-        }
+        setHistoryItems(items);
       } catch (err: any) {
         setError(err.message || "Đã xảy ra lỗi khi tải dữ liệu.");
       } finally {
