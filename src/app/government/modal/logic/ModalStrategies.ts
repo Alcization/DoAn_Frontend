@@ -1,3 +1,5 @@
+import type { Priority } from "../../../../context/services/mock/government/scenario-management";
+
 /**
  * [STRATEGY PATTERN] - PRIORITY_STRATEGY: Define colors/styles for different priorities.
  */

@@ -6,8 +6,8 @@ type FavoriteLocation = {
   id: number;
   name: string;
   address: string;
-  temp: number;
-  weather: string;
+  temp?: number;
+  weather?: string;
 };
 
 type ViewAllFavoritesModalProps = {
@@ -61,18 +61,20 @@ export default function ViewAllFavoritesModal({ isOpen, onClose, mode, data }: V
                       </p>
                     </div>
                   </div>
-                  <div className="text-right ml-3">
-                    <div className="text-2xl mb-1">
-                      {loc.weather === "sunny"
-                        ? "☀️"
-                        : loc.weather === "cloudy"
-                        ? "⛅"
-                        : "🌧️"}
+                  {typeof loc.temp === "number" && (
+                    <div className="text-right ml-3">
+                      <div className="text-2xl mb-1">
+                        {loc.weather === "sunny"
+                          ? "☀️"
+                          : loc.weather === "cloudy"
+                          ? "⛅"
+                          : "🌧️"}
+                      </div>
+                      <div className="font-semibold text-(--color-text-primary)">
+                        {loc.temp}°C
+                      </div>
                     </div>
-                    <div className="font-semibold text-(--color-text-primary)">
-                      {loc.temp}°C
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             ))}

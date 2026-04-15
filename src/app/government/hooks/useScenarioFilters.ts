@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { ScenarioFilters } from "../component/modal-logic/ModalTypes";
+import { ScenarioFilters } from "../modal/logic/ModalTypes";
 
 /**
  * [FACADE PATTERN] - useScenarioFilters: Encapsulates scenario filtering logic.

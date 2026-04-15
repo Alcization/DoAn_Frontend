@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Priority, ScenarioAction } from "../../../context/services/mock/government/scenario-management";
-import { ModalFormData } from "../component/modal-logic/ModalTypes";
+import { ModalFormData } from "../modal/logic/ModalTypes";
 
 /**
  * [FACADE PATTERN] - useAddStep: Manages form state and actions for adding a scenario step.

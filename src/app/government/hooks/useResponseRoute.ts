@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { HeatmapArea } from "../../../context/services/mock/government/dashboard";
-import { RISK_STYLE_STRATEGY } from "../component/modal-logic/ModalStrategies";
+import { RISK_STYLE_STRATEGY } from "../modal/logic/ModalStrategies";
 
 /**
  * [FACADE PATTERN] - useResponseRoute: Logic for response route planning.

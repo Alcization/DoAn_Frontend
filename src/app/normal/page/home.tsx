@@ -35,10 +35,10 @@ export default function NormalHome({ mode = "personal" }: NormalHomeProps) {
 
       <CurrentWeatherCard />
 
-      <FavoritePlaces mode={mode} data={mode === "business" ? (data as any).FAVORITE_ROUTES : data.FAVORITE_LOCATIONS} />
+      <FavoritePlaces mode={mode} />
       
       {mode === "business" && (
-        <FavoritePlaces mode="personal" navMode="business" data={data.FAVORITE_LOCATIONS} />
+        <FavoritePlaces mode="personal" navMode="business" />
       )}
     </div>
   );

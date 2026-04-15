@@ -29,8 +29,7 @@ export default function NormalAccount() {
       <div className="bg-[var(--color-surface)] rounded-[24px] p-4 sm:p-6 shadow-[var(--shadow-md)] flex flex-col gap-5 border border-[var(--color-border)]">
         <AccountProfileSection 
             avatar={avatar} 
-            setAvatar={setAvatar} 
-            email={USER_PROFILE_MOCK.email}
+          setAvatar={setAvatar}
         />
 
         <AccountDetailsForm 

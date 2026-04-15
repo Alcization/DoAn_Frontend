@@ -1,14 +1,5 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-
-// Mock Data
-import { 
-  FAVORITE_LOCATIONS, 
-  WEATHER_TIMELINE, 
-  HOURLY_24_FORECAST, 
-  WEEK_FORECAST 
-} from "../../../context/services/mock/normal/shared/weather";
 
 // Components
 import CurrentWeatherDetail from "../shared_component/CurrentWeatherDetail";
@@ -16,7 +7,6 @@ import HourlyForecast from "../shared_component/HourlyForecast";
 import WeekForecastList from "../shared_component/WeekForecastList";
 
 export default function NormalWeather() {
-  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const locationParam = searchParams.get("loc");
   const [selectedLocation, setSelectedLocation] = useState(locationParam || "Quận 1, TP.HCM");
@@ -32,9 +22,9 @@ export default function NormalWeather() {
 
       <CurrentWeatherDetail selectedLocation={selectedLocation} />
 
-      <HourlyForecast forecast={HOURLY_24_FORECAST} />
+      <HourlyForecast />
 
-      <WeekForecastList forecast={WEEK_FORECAST} />
+      <WeekForecastList />
     </div>
   );
 }

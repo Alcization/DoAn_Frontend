@@ -110,7 +110,7 @@ export default function ActivateScenarioModal({ isOpen, onClose, incident, onAct
           </button>
           <button 
             onClick={handleActivate}
-            disabled={!selectedScenarioId || loading || error}
+            disabled={!selectedScenarioId || loading || Boolean(error)}
             className="px-8 py-2.5 rounded-xl font-bold bg-(--color-primary) text-white shadow-lg shadow-(--color-primary)/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
           >
             <Play size={18} fill="currentColor" />

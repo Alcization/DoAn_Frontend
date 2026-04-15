@@ -83,8 +83,8 @@ export const useReportSettings = (initialSettings?: ReportSettingsState) => {
       return nextSettings;
     });
 
-    if (nextSettingsSnapshot) {
-      memento.current = { ...nextSettingsSnapshot };
+    if (nextSettingsSnapshot !== null) {
+      memento.current = nextSettingsSnapshot;
     }
 
     return true;
