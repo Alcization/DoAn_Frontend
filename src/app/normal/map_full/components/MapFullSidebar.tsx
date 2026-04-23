@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Clock, MapPin, ChevronRight, Navigation, Loader2 } from 'lucide-react';
+import { useSidebar } from '../../../../context/sidebar/SidebarContext';
 
 interface SidebarItemProps {
   name: string;
@@ -49,6 +50,7 @@ export default function MapFullSidebar({
   history 
 }: MapFullSidebarProps) {
   const { t } = useTranslation();
+  const { isOpen } = useSidebar();
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -110,102 +112,109 @@ export default function MapFullSidebar({
   };
 
   return (
-    <aside className="w-full lg:w-96 bg-(--color-surface) border-r border-(--color-border) flex flex-col z-20 shadow-(--shadow-md)">
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="p-2 bg-(--color-primary) rounded-lg">
-             <Navigation className="text-white" size={20} />
+    <aside 
+      className={`
+        bg-(--color-surface) border-r border-(--color-border) flex flex-col z-20 shadow-(--shadow-md) transition-all duration-300 ease-in-out overflow-hidden
+        ${isOpen ? "w-full lg:w-96 opacity-100" : "w-0 opacity-0 border-none"}
+      `}
+    >
+      <div className={`flex flex-col h-full ${!isOpen ? "opacity-0 pointer-events-none" : "w-full lg:w-96 opacity-100 transition-opacity duration-300"}`}>
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-(--color-primary) rounded-lg">
+               <Navigation className="text-white" size={20} />
+            </div>
+            <h1 className="text-xl font-bold text-(--color-text-primary) tracking-tight">
+              {t('mapFull.title')}
+            </h1>
           </div>
-          <h1 className="text-xl font-bold text-(--color-text-primary) tracking-tight">
-            {t('mapFull.title')}
-          </h1>
+
+          {/* Search Bar */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-muted)" size={18} />
+            <input 
+              type="text"
+              placeholder={t('mapFull.search.placeholder')}
+              value={searchQuery}
+              onChange={(e) => onInputChange(e.target.value)}
+              className="w-full pl-10 pr-12 py-3 bg-(--color-bg) border-none rounded-xl text-sm focus:ring-2 focus:ring-(--color-primary) transition-all outline-none text-(--color-text-primary)"
+            />
+            {isSearching && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <Loader2 className="animate-spin text-(--color-primary)" size={18} />
+              </div>
+            )}
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-4 border-b border-(--color-border) mb-4">
+            <button 
+              onClick={() => setActiveTab('search')}
+              className={`pb-2 text-sm font-bold transition-colors relative ${activeTab === 'search' ? 'text-(--color-primary)' : 'text-(--color-text-muted)'}`}
+            >
+              {t('mapFull.search.results')}
+              {activeTab === 'search' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--color-primary) rounded-full" />}
+            </button>
+            <button 
+              onClick={() => setActiveTab('history')}
+              className={`pb-2 text-sm font-bold transition-colors relative ${activeTab === 'history' ? 'text-(--color-primary)' : 'text-(--color-text-muted)'}`}
+            >
+              {t('mapFull.search.history')}
+              {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--color-primary) rounded-full" />}
+            </button>
+          </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-(--color-text-muted)" size={18} />
-          <input 
-            type="text"
-            placeholder={t('mapFull.search.placeholder')}
-            value={searchQuery}
-            onChange={(e) => onInputChange(e.target.value)}
-            className="w-full pl-10 pr-12 py-3 bg-(--color-bg) border-none rounded-xl text-sm focus:ring-2 focus:ring-(--color-primary) transition-all outline-none text-(--color-text-primary)"
-          />
-          {isSearching && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <Loader2 className="animate-spin text-(--color-primary)" size={18} />
-            </div>
+        {/* List Content */}
+        <div className="flex-1 overflow-y-auto px-4 pb-6 scrollbar-hide">
+          {activeTab === 'search' ? (
+             <div className="space-y-1">
+               {searchResults.length > 0 ? (
+                 searchResults.map((result, idx) => (
+                   <SidebarItem 
+                     key={result.ref_id || idx}
+                     name={result.name}
+                     address={result.address}
+                     onClick={() => handleSelectResult(result)} 
+                     type="search" 
+                   />
+                 ))
+               ) : searchQuery && !isSearching ? (
+                  <p className="text-center text-(--color-text-muted) text-sm mt-10">
+                    {t('mapFull.search.noResults') || "No results found"}
+                  </p>
+               ) : (
+                  <p className="text-center text-(--color-text-muted) text-sm mt-10">
+                    {t('mapFull.search.startTyping') || "Start typing to search..."}
+                  </p>
+               )}
+             </div>
+          ) : (
+             <div className="space-y-1">
+               {history.length > 0 ? history.map(item => (
+                 <SidebarItem 
+                   key={item.id}
+                   name={item.name}
+                   address={item.address}
+                   time={item.time}
+                   onClick={() => {}}
+                   type="history"
+                 />
+               )) : (
+                 <p className="text-center text-(--color-text-muted) text-sm mt-10">
+                   {t('mapFull.history.empty')}
+                 </p>
+               )}
+             </div>
           )}
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 border-b border-(--color-border) mb-4">
-          <button 
-            onClick={() => setActiveTab('search')}
-            className={`pb-2 text-sm font-bold transition-colors relative ${activeTab === 'search' ? 'text-(--color-primary)' : 'text-(--color-text-muted)'}`}
-          >
-            {t('mapFull.search.results')}
-            {activeTab === 'search' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--color-primary) rounded-full" />}
-          </button>
-          <button 
-            onClick={() => setActiveTab('history')}
-            className={`pb-2 text-sm font-bold transition-colors relative ${activeTab === 'history' ? 'text-(--color-primary)' : 'text-(--color-text-muted)'}`}
-          >
-            {t('mapFull.search.history')}
-            {activeTab === 'history' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--color-primary) rounded-full" />}
-          </button>
+        {/* Bottom Actions */}
+        <div className="p-6 border-t border-(--color-border) bg-(--color-surface)">
+           <button className="w-full py-3 bg-(--color-primary) text-white rounded-xl font-bold text-sm shadow-(--shadow-md) hover:brightness-110 transition-all active:scale-[0.98]">
+              {t('mapFull.actions.startNavigation')}
+           </button>
         </div>
-      </div>
-
-      {/* List Content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-6 scrollbar-hide">
-        {activeTab === 'search' ? (
-           <div className="space-y-1">
-             {searchResults.length > 0 ? (
-               searchResults.map((result, idx) => (
-                 <SidebarItem 
-                   key={result.ref_id || idx}
-                   name={result.name}
-                   address={result.address}
-                   onClick={() => handleSelectResult(result)} 
-                   type="search" 
-                 />
-               ))
-             ) : searchQuery && !isSearching ? (
-                <p className="text-center text-(--color-text-muted) text-sm mt-10">
-                  {t('mapFull.search.noResults') || "No results found"}
-                </p>
-             ) : (
-                <p className="text-center text-(--color-text-muted) text-sm mt-10">
-                  {t('mapFull.search.startTyping') || "Start typing to search..."}
-                </p>
-             )}
-           </div>
-        ) : (
-           <div className="space-y-1">
-             {history.length > 0 ? history.map(item => (
-               <SidebarItem 
-                 key={item.id}
-                 name={item.name}
-                 address={item.address}
-                 time={item.time}
-                 onClick={() => {}}
-                 type="history"
-               />
-             )) : (
-               <p className="text-center text-(--color-text-muted) text-sm mt-10">
-                 {t('mapFull.history.empty')}
-               </p>
-             )}
-           </div>
-        )}
-      </div>
-
-      {/* Bottom Actions */}
-      <div className="p-6 border-t border-(--color-border) bg-(--color-surface)">
-         <button className="w-full py-3 bg-(--color-primary) text-white rounded-xl font-bold text-sm shadow-(--shadow-md) hover:brightness-110 transition-all active:scale-[0.98]">
-            {t('mapFull.actions.startNavigation')}
-         </button>
       </div>
     </aside>
   );

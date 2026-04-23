@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useSidebar } from "../../context/sidebar/SidebarContext";
+import { Suspense } from "react";
 
 interface SidebarItem {
   labelKey: string;
@@ -14,7 +15,7 @@ interface SidebarProps {
   items: SidebarItem[];
 }
 
-export default function Sidebar({ items }: SidebarProps) {
+function SidebarContent({ items }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
@@ -35,8 +36,8 @@ export default function Sidebar({ items }: SidebarProps) {
       <aside 
         className={`
           flex-shrink-0 h-[calc(100vh-80px)] sticky top-20 bg-[var(--color-surface)] border-r border-[var(--color-border)] overflow-y-auto transition-all duration-300 ease-in-out print:hidden
-          lg:w-64 lg:opacity-100
-          ${isOpen ? "w-64 opacity-100 z-50" : "w-0 opacity-0 overflow-hidden border-none"}
+          ${isOpen ? "w-64 opacity-100 translate-x-0" : "w-0 opacity-0 -translate-x-full lg:translate-x-0 overflow-hidden border-none"}
+          z-50
         `}
       >
         <nav className="flex flex-col p-4 gap-2">
@@ -78,5 +79,13 @@ export default function Sidebar({ items }: SidebarProps) {
         </nav>
       </aside>
     </>
+  );
+}
+
+export default function Sidebar(props: SidebarProps) {
+  return (
+    <Suspense fallback={<div className="w-64 h-full bg-[var(--color-surface)] animate-pulse" />}>
+      <SidebarContent {...props} />
+    </Suspense>
   );
 }

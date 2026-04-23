@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import EditLocationModal from "../modal/EditLocationModal";
 import SetAlertModal from "../modal/SetAlertModal";
 import DeleteLocationModal from "../modal/DeleteLocationModal";
 import { useFavoriteCommands } from "../hooks/useFavoriteCommands";
 import { FavoriteItem, LocationItemRenderer } from "./FavoriteItemFactory";
 import { API_BASE_URL } from "@/services/api-config";
+import { usePagination } from "../hooks/usePagination";
 
 // Interface khớp với dữ liệu API
 export interface Location {
@@ -20,7 +22,6 @@ export interface Location {
   weather?: string;
 }
 
-// Lược bỏ locations, onReorder, onDelete vì Component tự quản lý Fetch API
 interface PersonalFavoriteLocationsProps {
   maxLocations?: number;
 }
@@ -125,6 +126,16 @@ export default function PersonalFavoriteLocations({
     }
   };
 
+  // Pagination hook
+  const {
+    currentItems,
+    currentPage,
+    totalPages,
+    goToPage,
+  } = usePagination(locations, 10);
+
+  const startIndex = (currentPage - 1) * 10;
+
   // Command Pattern (Modal / Action management)
   const { selectedItem, modals, commands, closeAll } = useFavoriteCommands({
     onEdit: (loc) => console.log("Mở modal sửa cho:", loc.name),
@@ -160,16 +171,16 @@ export default function PersonalFavoriteLocations({
   return (
     <>
       <div className="bg-[var(--color-surface)] rounded-[24px] p-4 sm:p-6 shadow-[var(--shadow-sm)] flex flex-col gap-3 border border-[var(--color-border)]">
-        {locations.length === 0 ? (
+        {currentItems.length === 0 ? (
           <p className="text-center text-[var(--color-text-muted)] py-8">
             {t("personalPage.empty")}
           </p>
         ) : (
-          locations.map((loc, index) => (
+          currentItems.map((loc, index) => (
             <FavoriteItem
               key={`personal-${loc.id}`}
               item={loc}
-              index={index}
+              index={startIndex + index}
               renderer={renderer}
               commands={commands}
               onDragStart={(idx: number) => (window as any)._draggedIdx = idx}
@@ -182,6 +193,42 @@ export default function PersonalFavoriteLocations({
           <p className="text-[var(--text-xs)] text-[var(--color-warning)] text-center mt-2">
             {t("personalPage.limit", { max: maxLocations })}
           </p>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <button
+              onClick={() => goToPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => goToPage(page)}
+                  className={`w-8 h-8 rounded-xl font-bold transition-all text-xs ${
+                    currentPage === page
+                      ? "bg-(--color-primary) text-white shadow-lg shadow-(--color-primary)/20"
+                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         )}
       </div>
 

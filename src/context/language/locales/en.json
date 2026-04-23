@@ -668,7 +668,12 @@
       "flood": "Flood",
       "landslide": "Landslide",
       "none": "None",
-      "recommendations": "Recommendations:"
+      "recommendations": "Recommendations:",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "riskLevelLabel": "Risk Level",
+      "assessmentDetails": "Assessment Details:",
+      "recommendationLabel": "Recommendation:"
     }
   },
   "map": {

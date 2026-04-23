@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { decodePolyline } from '@/util/polyline';
 
@@ -84,6 +84,10 @@ export default function MapFullPage() {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [dynamicRoute, setDynamicRoute] = useState<any>(null);
   const [vizMode, setVizMode] = useState<'traffic' | 'weather'>('traffic');
+
+  const handleRouteFound = useCallback((data: any) => {
+    setDynamicRoute(data);
+  }, []);
   
   // Real-time route data from the fetcher
   const routeData = useMemo(() => {
@@ -158,7 +162,7 @@ export default function MapFullPage() {
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-(--color-bg) overflow-hidden font-sans">
-      <RouteFetcher targetLocation={selectedLocation} onRouteFound={setDynamicRoute} />
+      <RouteFetcher targetLocation={selectedLocation} onRouteFound={handleRouteFound} />
       
       {/* Sidebar Component */}
       <MapFullSidebar 

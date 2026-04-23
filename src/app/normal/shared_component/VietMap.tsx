@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef, useCallback } from "react";
 // Import GL JS without .js extension for Next.js compatibility
 import vietmapgl from "@vietmap/vietmap-gl-js/dist/vietmap-gl";
-import "@vietmap/vietmap-gl-js/dist/vietmap-gl.css";
+// import "@vietmap/vietmap-gl-js/dist/vietmap-gl.css";
 
 import { FullscreenControl } from "@/util/fullscreen_control";
 import { ZoomToBoundsControl } from "@/util/zoom_to_bounds_control";

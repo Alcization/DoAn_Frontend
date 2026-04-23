@@ -4,6 +4,7 @@ import LocationSelector, { LocationSelectorData } from "../shared_component/Loca
 import { BaseModal, ModalHeader, ModalBody, ModalFooter } from "../shared_component/BaseModal";
 import { useLocationForm } from "../hooks/useLocationForm";
 import { useModalActions } from "../hooks/useModalActions";
+import { useMemo } from "react";
 
 type EditLocationModalProps = {
   isOpen: boolean;
@@ -16,8 +17,36 @@ type EditLocationModalProps = {
 export default function EditLocationModal({ isOpen, onClose, mode = "personal", location, onSave }: EditLocationModalProps) {
   const { t } = useTranslation();
 
-  // Xử lý giá trị mặc định (Fallback) an toàn, chống crash khi API thiếu field
-  const getInitialData = (): { initialName: string; initialData: LocationSelectorData } => {
+  // // Xử lý giá trị mặc định (Fallback) an toàn, chống crash khi API thiếu field
+  // const getInitialData = (): { initialName: string; initialData: LocationSelectorData } => {
+  //   if (!location) return { initialName: "", initialData: {} };
+    
+  //   if (mode === "personal") {
+  //     return {
+  //       initialName: location.name || "", // Fallback name
+  //       initialData: {
+  //         personal: {
+  //           lat: location.lat || 0,        // Fallback lat
+  //           lng: location.lng || 0,        // Fallback lng
+  //           address: location.address || "" // Fallback address
+  //         }
+  //       }
+  //     };
+  //   } else {
+  //     return {
+  //       initialName: location.name || "",
+  //       initialData: {
+  //         origin: location.origin || { lat: 0, lng: 0, address: "" },
+  //         destination: location.destination || { lat: 0, lng: 0, address: "" },
+  //         routeData: location.routeData || null
+  //       }
+  //     };
+  //   }
+  // };
+
+  // const { initialName, initialData } = getInitialData();
+
+  const { initialName, initialData } = useMemo(() => {
     if (!location) return { initialName: "", initialData: {} };
     
     if (mode === "personal") {
@@ -33,7 +62,7 @@ export default function EditLocationModal({ isOpen, onClose, mode = "personal", 
       };
     } else {
       return {
-        initialName: location.name || "",
+        initialName: location.name || "", // Fallback name
         initialData: {
           origin: location.origin || { lat: 0, lng: 0, address: "" },
           destination: location.destination || { lat: 0, lng: 0, address: "" },
@@ -41,9 +70,7 @@ export default function EditLocationModal({ isOpen, onClose, mode = "personal", 
         }
       };
     }
-  };
-
-  const { initialName, initialData } = getInitialData();
+  }, [location, mode]);
 
   const { 
     name, 

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Clock, AlertTriangle, Info, AlertCircle } from "lucide-react";
+import { Bell, Clock, AlertTriangle, Info, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "@/services/api-config";
+import { usePagination } from "../hooks/usePagination";
 
 // Khai báo cấu trúc dữ liệu trả về từ API
 interface Notification {
@@ -81,6 +82,13 @@ export default function PersonalSettings() {
     });
   };
 
+  const {
+    currentItems,
+    currentPage,
+    totalPages,
+    goToPage,
+  } = usePagination(notifications, 10);
+
   return (
     <div className="bg-(--color-surface) rounded-[24px] p-4 sm:p-6 shadow-(--shadow-sm) flex flex-col gap-4 border border-(--color-border)">
       <div className="flex items-center justify-between mb-2">
@@ -101,7 +109,7 @@ export default function PersonalSettings() {
         ) : notifications.length === 0 ? (
           <div className="text-center text-(--color-text-secondary) py-4">Chưa có cảnh báo nào</div>
         ) : (
-          notifications.map((item) => {
+          currentItems.map((item) => {
             const normalizedLevel = normalizeLevel(item.type);
             
             return (
@@ -138,6 +146,42 @@ export default function PersonalSettings() {
           })
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <button
+            onClick={() => goToPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="p-2 rounded-xl border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-bg) disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => goToPage(page)}
+                className={`w-8 h-8 rounded-xl font-bold transition-all text-xs ${
+                  currentPage === page
+                    ? "bg-(--color-primary) text-white shadow-lg shadow-(--color-primary)/20"
+                    : "text-(--color-text-secondary) hover:bg-(--color-bg)"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="p-2 rounded-xl border border-(--color-border) bg-(--color-surface) text-(--color-text-secondary) hover:bg-(--color-bg) disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

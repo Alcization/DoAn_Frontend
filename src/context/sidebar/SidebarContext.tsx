@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react";
 
 interface SidebarContextType {
   isOpen: boolean;
@@ -11,27 +11,41 @@ interface SidebarContextType {
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
-export function SidebarProvider({ children }: { children: ReactNode }) {
-  // Default to true for desktop-centric apps, or false if mobile-first
+export const SidebarProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const toggleSidebar = () => setIsOpen((prev) => !prev);
-  const closeSidebar = () => setIsOpen(false);
-  const openSidebar = () => setIsOpen(true);
+  const toggleSidebar = useCallback(() => {
+    setIsOpen((prev) => !prev);
+  }, []);
+
+  const closeSidebar = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const openSidebar = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const value = useMemo(() => ({
+    isOpen,
+    toggleSidebar,
+    closeSidebar,
+    openSidebar
+  }), [isOpen, toggleSidebar, closeSidebar, openSidebar]);
 
   return (
-    <SidebarContext.Provider
-      value={{ isOpen, toggleSidebar, closeSidebar, openSidebar }}
-    >
+    <SidebarContext.Provider value={value}>
       {children}
     </SidebarContext.Provider>
   );
-}
+};
 
-export function useSidebar() {
+export const useSidebar = () => {
   const context = useContext(SidebarContext);
   if (context === undefined) {
     throw new Error("useSidebar must be used within a SidebarProvider");
   }
   return context;
-}
+};

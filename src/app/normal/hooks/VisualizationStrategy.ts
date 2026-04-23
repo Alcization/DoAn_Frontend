@@ -88,7 +88,7 @@ export class WeatherStrategy implements VisualizationStrategy {
  */
 export class VisualizationProcessor {
   static processRoute(coords: any[], strategy: VisualizationStrategy) {
-    if (coords.length < 10) return null;
+    if (coords.length < 2) return null;
 
     const partLen = Math.floor(coords.length / 4);
     const features: any[] = [];

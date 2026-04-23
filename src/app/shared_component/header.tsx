@@ -59,7 +59,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         {/* Hamburger Menu - Hidden on desktop (lg and above) */}
         <button 
-          className="bg-transparent border-none cursor-pointer p-1 rounded-[var(--radius-sm)] transition-colors duration-200 flex items-center justify-center hover:bg-[var(--color-bg-secondary)] lg:hidden"
+          className="bg-transparent border-none cursor-pointer p-1 rounded-[var(--radius-sm)] transition-colors duration-200 flex items-center justify-center hover:bg-[var(--color-bg-secondary)]"
           aria-label="Menu"
           onClick={toggleSidebar}
         >
