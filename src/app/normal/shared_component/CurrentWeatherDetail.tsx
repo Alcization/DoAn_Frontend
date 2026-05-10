@@ -91,14 +91,15 @@ export default function CurrentWeatherDetail({ selectedLocation }: CurrentWeathe
       windSpeed: weatherData?.windSpeed,
     });
 
-    const aqiMetric = {
-      icon: Activity,
-      label: t("weather.current.aqi", { defaultValue: "AQI" }),
-      value: weatherData ? `${weatherData.aqi} (${getAqiStatus(weatherData.aqi)})` : "--",
-      type: "aqi" as any
-    };
+    // const aqiMetric = {
+    //   icon: Activity,
+    //   label: t("weather.current.aqi", { defaultValue: "AQI" }),
+    //   value: weatherData ? `${weatherData.aqi} (${getAqiStatus(weatherData.aqi)})` : "--",
+    //   type: "aqi" as any
+    // };
 
-    return [...baseMetrics, aqiMetric];
+    // return [...baseMetrics, aqiMetric];
+    return baseMetrics;
   }, [adaptCurrentWeather, weatherData, t]);
 
   if (loading) {
@@ -149,7 +150,7 @@ export default function CurrentWeatherDetail({ selectedLocation }: CurrentWeathe
       </p>
       
       {/* Metrics Grid (Factory Pattern) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8 text-left border-t border-(--color-border) pt-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-8 text-left border-t border-(--color-border) pt-6">
         {weatherMetrics.map((metric, idx) => 
           WeatherMetricFactory.createDetailMetric(metric, `detail-metric-${idx}`)
         )}
