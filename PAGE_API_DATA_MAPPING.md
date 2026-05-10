@@ -54,10 +54,10 @@ Tai lieu nay liệt kê theo tung route/trang dang co trong `src/app`, bao gom c
   - `GET ${API_BASE_URL}/admin/alerts`
   - Fallback: `GET ${API_BASE_URL}/government/dashboard-summary`
 - API external weather (qua shared service):
-  - `GET https://api.openweathermap.org/geo/1.0/direct`
-  - `GET https://api.openweathermap.org/data/2.5/forecast`
-  - `GET https://api.openweathermap.org/data/2.5/weather`
-  - `GET https://history.openweathermap.org/data/2.5/history/city`
+  - `POST /api/weather/geo/1.0/direct`
+  - `POST /api/weather/data/2.5/forecast`
+  - `POST /api/weather/data/2.5/weather`
+  - `POST /api/weather/data/2.5/history/city`
 - Gọi tại:
   - `src/app/government/hooks/useDashboard.ts`
   - `src/context/services/api/government/history-incidents.ts`
@@ -122,7 +122,7 @@ Tai lieu nay liệt kê theo tung route/trang dang co trong `src/app`, bao gom c
 
 - Page: `src/app/normal/page/home.tsx`
 - API:
-  - `GET https://api.openweathermap.org/data/2.5/weather`
+  - `POST /api/weather/data/2.5/weather`
   - `POST ${API_BASE_URL}/routes/weather-history`
   - `GET ${API_BASE_URL}/routes/locations`
   - `GET ${API_BASE_URL}/routes`
@@ -132,7 +132,7 @@ Tai lieu nay liệt kê theo tung route/trang dang co trong `src/app`, bao gom c
     - `GET /api/vietmap-autocomplete`
     - `GET /api/vietmap-place`
     - `GET /api/vietmap-reverse`
-  - `GET https://api.openweathermap.org/data/2.5/weather` (cho tung item yeu thich)
+  - `POST /api/weather/data/2.5/weather` (cho tung item yeu thich)
 - Gọi tại:
   - `src/app/normal/shared_component/CurrentWeatherCard.tsx`
   - `src/app/normal/shared_component/FavoritePlaces.tsx`
@@ -143,10 +143,10 @@ Tai lieu nay liệt kê theo tung route/trang dang co trong `src/app`, bao gom c
 
 - Page: `src/app/normal/page/weather.tsx`
 - API:
-  - `GET https://api.openweathermap.org/data/2.5/weather`
-  - `GET https://api.openweathermap.org/data/2.5/air_pollution`
-  - `GET https://pro.openweathermap.org/data/2.5/forecast/hourly`
-  - `GET https://api.openweathermap.org/data/2.5/forecast/daily`
+  - `POST /api/weather/data/2.5/weather`
+  - `POST /api/weather/data/2.5/air_pollution`
+  - `POST /api/weather/data/2.5/forecast/hourly`
+  - `POST /api/weather/data/2.5/forecast/daily`
 - Gọi tại:
   - `src/app/normal/shared_component/CurrentWeatherDetail.tsx`
   - `src/app/normal/shared_component/HourlyForecast.tsx`
@@ -162,7 +162,7 @@ Tai lieu nay liệt kê theo tung route/trang dang co trong `src/app`, bao gom c
     - `GET /api/vietmap-reverse`
     - `GET /api/vietmap-route`
   - `POST ${API_BASE_URL}/routes/history`
-  - `GET https://api.openweathermap.org/data/2.5/weather` (lay weather theo tung segment)
+  - `POST /api/weather/data/2.5/weather` (lay weather theo tung segment)
 - Gọi tại:
   - `src/app/normal/shared_component/LocationInputs.tsx`
   - `src/app/normal/shared_component/MapVisualization.tsx`
@@ -243,8 +243,8 @@ Tai lieu nay liệt kê theo tung route/trang dang co trong `src/app`, bao gom c
   - `GET ${API_BASE_URL}/routes` (bo loc route)
   - `GET ${API_BASE_URL}/users/me/report-schedules`
   - `POST ${API_BASE_URL}/users/me/report-schedules`
-  - `GET https://history.openweathermap.org/data/2.5/history/city` (chart xu huong/tan suat)
-  - `GET https://api.openweathermap.org/data/2.5/forecast` (phan tich rui ro)
+  - `POST /api/weather/data/history/city` (chart xu huong/tan suat)
+  - `POST /api/weather/data/forecast` (phan tich rui ro)
   - `GET /api/vietmap-autocomplete` (tim kiem diem)
   - `GET https://maps.vietmap.vn/api/place/v3` (lay toa do chi tiet theo refid)
 - Gọi tại:

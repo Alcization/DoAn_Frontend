@@ -281,7 +281,7 @@ export default function CurrentWeatherCard() {
           {showMap ? t("common.hideMap") : t("common.showMap")}
         </button>
         <button
-          onClick={() => router.push(`/normal/page/weather?location=${encodeURIComponent(address)}`)}
+          onClick={() => router.push(`page?tab=weather&location=${encodeURIComponent(address)}`)}
           className="flex-1 bg-(--color-primary) text-white hover:opacity-90 active:scale-[0.98] transition-all py-3.5 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-1 sm:gap-2 shadow-lg shadow-(--shadow-sm)"
         >
           {t("sidebar.weatherForecast")}

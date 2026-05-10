@@ -8,7 +8,7 @@ import WeekForecastList from "../shared_component/WeekForecastList";
 
 export default function NormalWeather() {
   const searchParams = useSearchParams();
-  const locationParam = searchParams.get("loc");
+  const locationParam = searchParams.get("location");
   const [selectedLocation, setSelectedLocation] = useState(locationParam || "Quận 1, TP.HCM");
 
   useEffect(() => {

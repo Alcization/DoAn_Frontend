@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import EditLocationModal from "../modal/EditLocationModal";
 import SetAlertModal from "../modal/SetAlertModal";
 import DeleteLocationModal from "../modal/DeleteLocationModal";
 import { API_BASE_URL } from "@/services/api-config";
-import { usePagination } from "../hooks/usePagination";
 
 // Design Pattern Infrastructure
 import { useFavoriteCommands } from "../hooks/useFavoriteCommands";
@@ -29,6 +27,7 @@ interface Route {
   distance: number;
 }
 
+// Bỏ các props truyền dữ liệu từ component cha, chỉ giữ lại maxRoutes
 interface PersonalFavoriteRoutesProps {
   maxRoutes?: number;
 }
@@ -115,11 +114,14 @@ export default function PersonalFavoriteRoutes({
           end_point: { lat: destLat || 0, lng: destLng || 0 },
           start_address: originAddr,
           end_address: destAddr,
+          // Lưu ý: Nếu có tính toán lại distance, bạn có thể truyền vào đây. 
+          // Nếu không API sẽ tự giữ nguyên distance cũ (optional).
         })
       });
 
       const result = await response.json();
       if (result.success) {
+        // Cập nhật lại UI local sau khi sửa
         setRoutes((prev) => 
           prev.map((r) => r.id === id ? { 
             ...r, 
@@ -149,6 +151,7 @@ export default function PersonalFavoriteRoutes({
 
       const result = await response.json();
       if (result.success) {
+        // Cập nhật lại UI local sau khi xoá
         setRoutes((prev) => prev.filter((r) => r.id !== id));
       } else {
         alert("Không thể xoá tuyến đường.");
@@ -157,16 +160,6 @@ export default function PersonalFavoriteRoutes({
       console.error("Lỗi khi xoá tuyến đường:", error);
     }
   };
-
-  // Pagination hook
-  const {
-    currentItems,
-    currentPage,
-    totalPages,
-    goToPage,
-  } = usePagination(routes, 10);
-
-  const startIndex = (currentPage - 1) * 10;
 
   // Command Pattern (Modal / Action management)
   const { selectedItem, modals, commands, closeAll } = useFavoriteCommands({
@@ -187,6 +180,7 @@ export default function PersonalFavoriteRoutes({
     newItems.splice(index, 0, item);
     
     setRoutes(newItems);
+    // TODO: Nối API để lưu lại thứ tự mới nếu backend có hỗ trợ
   };
 
   if (isLoading) {
@@ -200,16 +194,16 @@ export default function PersonalFavoriteRoutes({
   return (
     <>
       <div className="bg-[var(--color-surface)] rounded-[24px] p-4 sm:p-6 shadow-[var(--shadow-sm)] flex flex-col gap-3 border border-[var(--color-border)]">
-        {currentItems.length === 0 ? (
+        {routes.length === 0 ? (
           <p className="text-center text-[var(--color-text-muted)] py-8">
             {t("personalPage.empty")}
           </p>
         ) : (
-          currentItems.map((route, index) => (
+          routes.map((route, index) => (
             <FavoriteItem
               key={`route-${route.id}`}
               item={route}
-              index={startIndex + index}
+              index={index}
               renderer={renderer}
               commands={commands}
               onDragStart={(idx: number) => (window as any)._draggedIdx = idx}
@@ -223,42 +217,6 @@ export default function PersonalFavoriteRoutes({
             {t("personalPage.limit", { max: maxRoutes })}
           </p>
         )}
-
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <button
-              onClick={() => goToPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => goToPage(page)}
-                  className={`w-8 h-8 rounded-xl font-bold transition-all text-xs ${
-                    currentPage === page
-                      ? "bg-(--color-primary) text-white shadow-lg shadow-(--color-primary)/20"
-                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Modals */}
@@ -268,6 +226,7 @@ export default function PersonalFavoriteRoutes({
         mode="business"
         //@ts-ignore
         location={selectedItem}
+        // Gọi hàm update API khi lưu modal
         onSave={(id, name, originAddr, originLat, originLng, destAddr, destLat, destLng) => {
           updateRouteAPI(id, name, originAddr, originLat, originLng, destAddr, destLat, destLng);
           closeAll();
@@ -285,6 +244,7 @@ export default function PersonalFavoriteRoutes({
         onClose={closeAll}
         //@ts-ignore
         location={selectedItem}
+        // Gọi hàm delete API khi xác nhận
         onConfirm={(id) => {
           deleteRouteAPI(id);
           closeAll();

@@ -14,22 +14,18 @@ export const useLocationForm = ({ mode, initialName = "", initialData = {}, isOp
 
   useEffect(() => {
     if (isOpen) {
-      if (name !== initialName) setName(initialName);
-      if (selectorData !== initialData) setSelectorData(initialData);
+      setName(initialName);
+      setSelectorData(initialData);
     } else {
-      if (name !== "") setName("");
-      // Only reset selectorData if it's not already empty
-      const isEmpty = !selectorData.personal && !selectorData.origin && !selectorData.destination;
-      if (!isEmpty) {
-        setSelectorData({
-          personal: null,
-          origin: null,
-          destination: null,
-          routeData: null
-        });
-      }
+      setName("");
+      setSelectorData({
+        personal: null,
+        origin: null,
+        destination: null,
+        routeData: null
+      });
     }
-  }, [isOpen, initialName, initialData, name, selectorData]);
+  }, [isOpen, initialName, initialData]);
 
   const isValid = useCallback(() => {
     if (!name.trim()) return false;
