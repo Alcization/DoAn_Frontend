@@ -223,6 +223,58 @@ export default function MapVisualization() {
 
   const routeData = useMemo(() => visualization?.geoJson || null, [visualization]);
 
+  // Generate smart advisory based on actual weather and route data
+  const advisory = useMemo(() => {
+    if (!weatherBySegment.length || !routeInfo) {
+      return {
+        delayMinutes: 15,
+        alertMessage: "",
+        hasAlert: false,
+        weatherWarning: ""
+      };
+    }
+
+    const rainySegments = weatherBySegment.filter(w => w.weather === 'rainy').length;
+    const cloudySegments = weatherBySegment.filter(w => w.weather === 'cloudy').length;
+    const maxTemp = Math.max(...weatherBySegment.map(w => w.temperatureC || 0));
+    const weatherConditionPercentage = rainySegments / weatherBySegment.length;
+
+    let delayMinutes = 15;
+    let alertMessage = "";
+    let hasAlert = false;
+    let weatherWarning = "";
+
+    if (weatherConditionPercentage > 0.5) {
+      delayMinutes = Math.ceil(routeInfo.time / 60000 * 0.3) + 15;
+      alertMessage = `⚠️ Thời tiết mưa nặng trong ${rainySegments}/${weatherBySegment.length} đoạn đường - hãy dành thêm thời gian`;
+      hasAlert = true;
+      weatherWarning = "⚠️ Thời tiết mưa nặng";
+    } else if (rainySegments > 0) {
+      delayMinutes = 20;
+      alertMessage = `🌧️ Thời tiết mưa trong ${rainySegments} đoạn - đường có thể trơn trượt`;
+      hasAlert = true;
+      weatherWarning = "🌧️ Thời tiết mưa nhẹ";
+    } else if (maxTemp > 35) {
+      delayMinutes = 20;
+      weatherWarning = "🌡️ Rất nóng (>35°C)";
+      alertMessage = "🌡️ Nhiệt độ cao - hãy đảm bảo xe của bạn ở tình trạng tốt và giữ nước";
+    } else if (maxTemp > 30) {
+      delayMinutes = 15;
+      weatherWarning = `☀️ Nắng (${maxTemp}°C)`;
+    } else if (cloudySegments > weatherBySegment.length / 2) {
+      weatherWarning = "☁️ Nhiều mây";
+    } else {
+      weatherWarning = "✓ Thời tiết quang đãng";
+    }
+
+    return {
+      delayMinutes,
+      alertMessage,
+      hasAlert,
+      weatherWarning
+    };
+  }, [weatherBySegment, routeInfo]);
+
   useEffect(() => {
     const handleRouteFound = (event: any) => {
       const data = event.detail;
@@ -320,25 +372,36 @@ export default function MapVisualization() {
           </div>
         </div>
 
-        {/* Advisory Section */}
-        <div className="mb-6 p-4 bg-(--color-primary-bg) border border-(--color-primary)/20 rounded-[16px] flex items-center justify-between shadow-sm">
+        {/* Advisory Section with Dynamic Weather Analysis */}
+        <div className={`mb-6 p-4 rounded-[16px] flex items-center justify-between shadow-sm border ${
+          advisory.hasAlert 
+            ? 'bg-(--color-warning-bg) border-(--color-warning)/20' 
+            : 'bg-(--color-primary-bg) border-(--color-primary)/20'
+        }`}>
           <div className="flex items-center gap-2">
-            <Activity size={18} className="text-(--color-primary)" />
-            <span className="text-(--text-sm) font-bold text-(--color-primary)">
-              {t("map.visualization.advision")}:
-            </span>
+            <Activity size={18} className={advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'} />
+            <div>
+              <span className={`text-(--text-sm) font-bold ${advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'}`}>
+                {t("map.visualization.advision")}:
+              </span>
+              {advisory.weatherWarning && (
+                <p className="text-(--text-xs) font-medium mt-1 m-0 opacity-80">
+                  {advisory.weatherWarning}
+                </p>
+              )}
+            </div>
           </div>
-          <span className="text-(--text-sm) font-bold text-(--color-primary)">
-            {t("map.visualization.startAfter", { minutes: 15 })}
+          <span className={`text-(--text-sm) font-bold ${advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'}`}>
+            {t("map.visualization.startAfter", { minutes: advisory.delayMinutes })}
           </span>
         </div>
 
-        {/* Alerts (Flyweight Pattern usage - shared mock alerts) */}
-        {ROUTE_SEGMENTS_MOCK.find((s) => s.alert) && (
-          <div className="p-4 rounded-[16px] bg-(--color-warning-bg) border border-(--color-warning)/20 text-(--color-warning) flex gap-3 items-center">
+        {/* Dynamic Weather/Route-Based Alerts */}
+        {advisory.hasAlert && advisory.alertMessage && (
+          <div className="p-4 rounded-[16px] bg-(--color-warning-bg) border border-(--color-warning)/20 text-(--color-warning) flex gap-3 items-center mb-4">
             <AlertTriangle size={20} className="shrink-0" />
             <span className="text-(--text-sm) font-medium">
-               {t(`map.visualization.${ROUTE_SEGMENTS_MOCK.find((s) => s.alert)?.alert}`)} at km {ROUTE_SEGMENTS_MOCK.find((s) => s.alert)?.km} (15:30)
+              {advisory.alertMessage}
             </span>
           </div>
         )}

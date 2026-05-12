@@ -534,7 +534,8 @@
         "tempDesc": "Thông báo khi nhiệt độ vượt ngưỡng",
         "windAlert": "Cảnh báo gió mạnh",
         "windDesc": "Thông báo khi tốc độ gió vượt ngưỡng",
-        "saveBtn": "Lưu cảnh báo"
+        "saveBtn": "Lưu cảnh báo",
+        "savingBtn": "Đang lưu..."
       },
       "alertHistory": {
         "title": "Lịch sử cảnh báo",

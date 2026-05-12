@@ -66,7 +66,7 @@ export default function FavoritePlaceItem({ loc, mode, navMode }: FavoritePlaceI
   }, [loc.lat, loc.lng]);
 
   const handleNavigateToWeather = () => {
-    router.push(`/normal/${navMode || mode}/page?tab=weather&loc=${encodeURIComponent(loc.name)}`);
+    router.push(`/normal/${navMode || mode}/page?tab=weather&location=${encodeURIComponent(loc.address)}`);
   };
 
   // Hàm render Emoji dựa trên trạng thái thời tiết

@@ -506,7 +506,8 @@
         "tempDesc": "Notify when temperature exceeds threshold",
         "windAlert": "Strong Wind Alert",
         "windDesc": "Notify when wind speed exceeds threshold",
-        "saveBtn": "Save Alerts"
+        "saveBtn": "Save Alerts",
+        "savingBtn": "Saving..."
       },
       "alertHistory": {
         "title": "Alert History",
