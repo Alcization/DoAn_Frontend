@@ -51,8 +51,8 @@ export default function CurrentWeatherCard() {
   const { adaptCurrentWeather } = useWeatherAdapter();
   
   // UI State
-  const [selectedLocation, setSelectedLocation] = useState({ lat: 10.762622, lng: 106.660172 });
-  const [address, setAddress] = useState("Q1, TP.HCM");
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [address, setAddress] = useState("");
   
   // Weather State
   const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -94,8 +94,9 @@ export default function CurrentWeatherCard() {
     }
   }, [API_KEY]);
 
-  // Fetch weather automatically when location changes
+  // Fetch weather automatically when location changes (only when we have coords)
   useEffect(() => {
+    if (!selectedLocation) return;
     fetchWeather(selectedLocation.lat, selectedLocation.lng);
   }, [selectedLocation, fetchWeather]);
 
@@ -175,13 +176,22 @@ export default function CurrentWeatherCard() {
   };
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => updateLocation(position.coords.latitude, position.coords.longitude),
-        (err) => console.log("Geolocation error:", err)
-      );
+    if (!navigator || !navigator.geolocation) {
+      console.log("Geolocation not supported");
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => updateLocation(position.coords.latitude, position.coords.longitude),
+      (err) => {
+        console.log("Geolocation error:", err);
+        // keep selectedLocation null and address empty — user can search manually
+      },
+      { enableHighAccuracy: true, timeout: 7000 }
+    );
   }, [updateLocation]);
+
+  const safeSelectedLocation = selectedLocation ?? { lat: 10.762622, lng: 106.660172 };
 
   return (
     <section className="rounded-[24px] p-6 shadow-(--shadow-lg) bg-(--color-primary-bg) border border-(--color-primary)/10 text-(--color-text-primary) relative overflow-hidden transition-all duration-300">
@@ -194,7 +204,9 @@ export default function CurrentWeatherCard() {
           <div className="flex flex-col gap-1 flex-1">
             <div className="flex items-start gap-2.5 p-1 -m-1">
               <MapPin size={20} className="shrink-0 mt-1 text-(--color-primary)" />
-              <span className="text-[var(--text-base)] font-bold text-left">{address}</span>
+              <span className="text-[var(--text-base)] font-bold text-left">
+                {address || (isReversing ? "Đang xác định vị trí..." : "Vị trí hiện tại")}
+              </span>
             </div>
           </div>
           <span className="text-4xl animate-pulse">
@@ -243,9 +255,9 @@ export default function CurrentWeatherCard() {
 
       {/* Map Implementation - Facade logic handles the updates */}
       <div className={`mb-6 transition-all duration-500 ease-in-out overflow-hidden border border-(--color-border) shadow-inner relative group/map ${showMap ? 'h-[350px] opacity-100 rounded-xl mt-2' : 'h-0 opacity-0 border-none'}`}>
-        <div className="h-[350px] w-full relative">
+          <div className="h-[350px] w-full relative">
           <VietMap
-            selectedLocation={selectedLocation}
+            selectedLocation={safeSelectedLocation}
             onLocationChange={(pos) => updateLocation(pos.lat, pos.lng)}
             onClick={(pos) => updateLocation(pos.lat, pos.lng)}
             zoom={14}

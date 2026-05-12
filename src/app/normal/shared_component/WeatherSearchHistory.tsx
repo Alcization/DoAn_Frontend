@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Clock, Thermometer, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePagination } from "../hooks/usePagination";
@@ -17,19 +17,39 @@ export interface ApiWeatherHistoryItem {
 
 const ITEMS_PER_PAGE = 10;
 
-export default function WeatherSearchHistory() {
+type WeatherSearchHistoryProps = {
+  dateFilter?: string;
+};
+
+export default function WeatherSearchHistory({ dateFilter = "" }: WeatherSearchHistoryProps) {
   const { t } = useTranslation();
   
   const [historyItems, setHistoryItems] = useState<ApiWeatherHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const toInputDateFormat = (isoString: string) => {
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const filteredHistoryItems = useMemo(() => {
+    if (!dateFilter) return historyItems;
+    return historyItems.filter((item) => toInputDateFormat(item.time) === dateFilter);
+  }, [historyItems, dateFilter]);
+
   const {
     currentItems,
     currentPage,
     totalPages,
     goToPage,
-  } = usePagination(historyItems, ITEMS_PER_PAGE);
+  } = usePagination(filteredHistoryItems, ITEMS_PER_PAGE);
 
   useEffect(() => {
     const fetchWeatherHistory = async () => {
@@ -79,10 +99,12 @@ export default function WeatherSearchHistory() {
     );
   }
 
-  if (historyItems.length === 0) {
+  if (filteredHistoryItems.length === 0) {
     return (
       <div className="bg-(--color-surface) rounded-3xl shadow-(--shadow-sm) border border-(--color-border) p-8 text-center text-(--color-text-muted) mt-2">
-        Bạn chưa có lịch sử tìm kiếm thời tiết nào.
+        {dateFilter
+          ? "Không có lịch sử thời tiết trong ngày đã chọn."
+          : "Bạn chưa có lịch sử tìm kiếm thời tiết nào."}
       </div>
     );
   }

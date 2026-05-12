@@ -669,7 +669,8 @@
         "sunny_clear": "Nắng/Quang đãng",
         "rain": "Mưa",
         "heavyRain": "Mưa lớn",
-        "cloudy": "Nhiều mây"
+        "cloudy": "Nhiều mây",
+        "extremeTemp": "Nhiệt độ cao"
       }
     },
     "settings": {

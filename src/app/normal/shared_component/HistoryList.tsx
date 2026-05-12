@@ -2,7 +2,7 @@
 
 import { Clock, Navigation, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { usePagination } from "../hooks/usePagination";
 import { getTripHistory } from "@/context/services/api/personal/history";
 
@@ -17,19 +17,39 @@ export interface ApiHistoryItem {
 
 const ITEMS_PER_PAGE = 10;
 
-export default function HistoryList() {
+type HistoryListProps = {
+  dateFilter?: string;
+};
+
+export default function HistoryList({ dateFilter = "" }: HistoryListProps) {
   const { t } = useTranslation();
   
   const [historyItems, setHistoryItems] = useState<ApiHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const toInputDateFormat = (isoString: string) => {
+    const date = new Date(isoString);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const filteredHistoryItems = useMemo(() => {
+    if (!dateFilter) return historyItems;
+    return historyItems.filter((item) => toInputDateFormat(item.time) === dateFilter);
+  }, [historyItems, dateFilter]);
+
   const {
     currentItems,
     currentPage,
     totalPages,
     goToPage,
-  } = usePagination(historyItems, ITEMS_PER_PAGE);
+  } = usePagination(filteredHistoryItems, ITEMS_PER_PAGE);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -115,7 +135,9 @@ export default function HistoryList() {
           ))
         ) : (
           <div className="p-10 text-center text-[var(--color-text-secondary)]">
-            Bạn chưa có lịch sử tìm kiếm tuyến đường nào.
+            {dateFilter
+              ? "Không có lịch sử tuyến đường trong ngày đã chọn."
+              : "Bạn chưa có lịch sử tìm kiếm tuyến đường nào."}
           </div>
         )}
       </div>

@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, Calendar } from "lucide-react";
 
-export default function WeekForecastList() {
+interface CurrentWeatherDetailProps {
+  selectedLocation: string;
+}
+
+export default function WeekForecastList({ selectedLocation }: CurrentWeatherDetailProps) {
   const { t, i18n } = useTranslation();
   const [forecastData, setForecastData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

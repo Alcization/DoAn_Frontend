@@ -641,7 +641,8 @@
         "sunny_clear": "Sunny/Clear",
         "rain": "Rain",
         "heavyRain": "Heavy Rain",
-        "cloudy": "Cloudy"
+        "cloudy": "Cloudy",
+        "extremeTemp": "Extreme Temperature"
       }
     },
     "settings": {
