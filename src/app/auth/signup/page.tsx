@@ -1,13 +1,12 @@
 "use client";
 
 import { Mail, Lock, User, Loader2 } from "lucide-react";
-import Image from "next/image";
 import AuthLayout from "../components/AuthLayout";
 import SignupRoleSelector from "../components/SignupRoleSelector";
 import AuthInput from "../components/AuthInput";
 import AuthButton from "../components/AuthButton";
 import AuthDivider from "../components/AuthDivider";
-import SocialLoginButton from "../components/SocialLoginButton";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 import { useSignupForm } from "../hooks/useSignupForm";
 
 export default function SignupPage() {
@@ -24,7 +23,8 @@ export default function SignupPage() {
     setShowConfirmPassword,
     handleInputChange,
     handleSignup,
-    handleGoogleSignIn,
+    handleGoogleSuccess,
+    handleGoogleError,
   } = useSignupForm();
 
   return (
@@ -105,10 +105,10 @@ export default function SignupPage() {
 
       <AuthDivider text={t("auth.signup.orContinueWith")} />
 
-      <SocialLoginButton
-        onClick={handleGoogleSignIn}
-        text={t("auth.signup.googleSignIn")}
-        icon={<Image src="/asssets/google.svg" alt="Google" width={20} height={20} />}
+      <GoogleAuthButton
+        mode="signup"
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
       />
 
       <div className="mt-6 text-center">

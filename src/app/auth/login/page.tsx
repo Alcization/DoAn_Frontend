@@ -1,12 +1,11 @@
 "use client";
 
-import { Mail, Lock } from "lucide-react";
-import Image from "next/image";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "../components/AuthLayout";
 import AuthInput from "../components/AuthInput";
 import AuthButton from "../components/AuthButton";
 import AuthDivider from "../components/AuthDivider";
-import SocialLoginButton from "../components/SocialLoginButton";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 import { useLoginForm } from "../hooks/useLoginForm";
 
 export default function LoginPage() {
@@ -19,13 +18,23 @@ export default function LoginPage() {
     setShowPassword,
     handleInputChange,
     handleLogin,
-    handleGoogleSignIn,
+    handleGoogleSuccess,
+    handleGoogleError,
     isEmailValid,
     handleForgotPassword,
+    isLoading,
+    apiError,
+    isGoogleAuthConfigured,
   } = useLoginForm();
 
   return (
     <AuthLayout>
+      {apiError && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm text-red-600">
+          {apiError}
+        </div>
+      )}
+
       <form onSubmit={handleLogin} className="space-y-5">
         <AuthInput
           label={t("auth.login.emailLabel")}
@@ -66,17 +75,24 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <AuthButton type="submit">
-          {t("auth.login.loginBtn")}
+        <AuthButton type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 size={18} className="animate-spin" />
+              {t("common.loading", { defaultValue: "Đang xử lý..." })}
+            </span>
+          ) : (
+            t("auth.login.loginBtn")
+          )}
         </AuthButton>
       </form>
 
       <AuthDivider text={t("auth.login.orContinueWith")} />
 
-      <SocialLoginButton
-        onClick={handleGoogleSignIn}
-        text={t("auth.login.googleSignIn")}
-        icon={<Image src="/asssets/google.svg" alt="Google" width={20} height={20} />}
+      <GoogleAuthButton
+        mode="signin"
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
       />
 
       <div className="mt-6 text-center">

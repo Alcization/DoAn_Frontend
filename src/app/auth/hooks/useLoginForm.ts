@@ -2,6 +2,13 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/services/api-config";
+import type { TokenResponse } from "@react-oauth/google"; // Đổi import sang TokenResponse
+import {
+  getRedirectPathByRoles,
+  persistAuthSession,
+  signInWithGoogleAccessToken, // Đổi tên hàm cho phù hợp với logic mới
+  isGoogleAuthConfigured,
+} from "./authSession";
 
 export function useLoginForm() {
   const { t } = useTranslation();
@@ -83,22 +90,9 @@ export function useLoginForm() {
 
       const data = await response.json();
 
-      if (data.accessToken) {
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-      }
+      persistAuthSession(data);
 
-      
-      const userRoles = data.roles || [];
-      if (userRoles.includes("moderator")) {
-        router.push("/normal/business/page?tab=home");
-      } else if (userRoles.includes("admin")) {
-        router.push("/government/page?tab=dashboard");
-      } else if (userRoles.includes("user")) {
-        router.push("/normal/personal/page?tab=home");
-      } else {
-        router.push("/auth/login");
-      }
+      router.push(getRedirectPathByRoles(data.roles || []));
 
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
@@ -118,8 +112,48 @@ export function useLoginForm() {
     router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
   };
 
-  const handleGoogleSignIn = () => {
-    console.log("Google Sign-In clicked");
+  // Cập nhật tham số nhận vào là Omit<TokenResponse,...> thay vì CredentialResponse
+  const handleGoogleSuccess = async (
+    tokenResponse: Omit<TokenResponse, "error" | "error_description" | "error_uri">
+  ) => {
+    // Lấy access_token thay vì credential (id_token)
+    const accessToken = tokenResponse.access_token;
+
+    if (!accessToken) {
+      setApiError(
+        t("auth.errors.googleTokenMissing", {
+          defaultValue: "Không nhận được Access Token từ Google. Vui lòng thử lại.",
+        }),
+      );
+      return;
+    }
+
+    setIsLoading(true);
+    setApiError("");
+
+    try {
+      // Gọi API tương ứng với access_token
+      const data = await signInWithGoogleAccessToken(accessToken);
+      persistAuthSession(data);
+      router.push(getRedirectPathByRoles(data.roles || []));
+    } catch (error) {
+      console.error("Lỗi đăng nhập Google:", error);
+      setApiError(
+        error instanceof Error
+          ? error.message
+          : t("auth.errors.serverError", { defaultValue: "Có lỗi xảy ra từ máy chủ. Vui lòng thử lại sau." }),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setApiError(
+      t("auth.errors.googleSignInFailed", {
+        defaultValue: "Không thể đăng nhập bằng Google. Vui lòng thử lại.",
+      }),
+    );
   };
 
   return {
@@ -133,8 +167,10 @@ export function useLoginForm() {
     setShowPassword,
     handleInputChange,
     handleLogin,
-    handleGoogleSignIn,
+    handleGoogleSuccess,
+    handleGoogleError,
     isEmailValid,
     handleForgotPassword,
+    isGoogleAuthConfigured,
   };
 }

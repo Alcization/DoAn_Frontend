@@ -141,3 +141,29 @@ All backend service calls are centralized in `src/api/api-client.ts`, which is g
 The following variables must be configured in `.env.local`:
 - `NEXT_PUBLIC_VIETMAP_API_KEY`: Required for all Vietmap proxy calls.
 - `NEXT_PUBLIC_API_URL`: Base URL for the Core Backend (typically `http://localhost:3000/api`).
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: Google OAuth client ID used by the frontend Google button.
+- `NEXT_PUBLIC_GOOGLE_AUTH_ENDPOINT`: Backend endpoint that receives the Google ID token. Default: `/auth/google`.
+
+## 5. Google Authentication Flow
+
+The frontend now supports Google sign-in on the auth pages.
+
+### Flow
+1. User clicks the Google button rendered by `@react-oauth/google`.
+2. Google returns an ID token to the frontend in the `credential` field.
+3. Frontend sends the token to the backend via `POST /auth/google` by default.
+4. Backend verifies the token and returns the same auth payload as password login: user info, roles, access token, and refresh token when available.
+5. Frontend stores the session in `localStorage` and redirects by role.
+
+### Request Body
+```json
+{
+  "idToken": "<google-id-token>"
+}
+```
+
+### Response Handling
+- `accessToken` is stored in `localStorage` as `accessToken`
+- `refreshToken` is stored in `localStorage` as `refreshToken`
+- `user` is stored in `localStorage` as `user` when returned
+- `roles` determine the redirect target

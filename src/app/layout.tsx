@@ -22,6 +22,7 @@ import Header from "./shared_component/header";
 import LanguageProvider from "../context/language/LanguageProvider";
 import { ThemeProvider } from "../context/theme/ThemeContext";
 import { SidebarProvider } from "../context/sidebar/SidebarContext";
+import AppProviders from "./providers";
 
 // ... existing imports ...
 
@@ -38,8 +39,10 @@ export default function RootLayout({
         <LanguageProvider>
           <ThemeProvider>
             <SidebarProvider>
-              <Header />
-              {children}
+              <AppProviders>
+                <Header />
+                {children}
+              </AppProviders>
             </SidebarProvider>
           </ThemeProvider>
         </LanguageProvider>

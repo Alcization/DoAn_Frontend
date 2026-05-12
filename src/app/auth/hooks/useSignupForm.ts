@@ -2,13 +2,20 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/services/api-config";
+import type { TokenResponse } from "@react-oauth/google"; // Cập nhật Import
+import {
+  getRedirectPathByRoles,
+  persistAuthSession,
+  signInWithGoogleAccessToken, // Cập nhật Import
+  isGoogleAuthConfigured,
+} from "./authSession";
 
 export function useSignupForm() {
   const { t } = useTranslation();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
-    fullName: "", // Đã thêm fullName để khớp với API yêu cầu
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -73,17 +80,15 @@ export function useSignupForm() {
     return "";
   };
 
-  // Sử dụng keyof typeof formData để Typescript hiểu các trường linh hoạt hơn
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
-    setApiError(null); // Xóa lỗi API khi người dùng bắt đầu nhập lại
+    setApiError(null); 
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Validate dữ liệu ở Client
     const fullNameError = validateFullName(formData.fullName);
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
@@ -99,12 +104,10 @@ export function useSignupForm() {
       return;
     }
 
-    // 2. Bắt đầu gọi API
     setIsLoading(true);
     setApiError(null);
 
     try {
-      // Tự động tạo username từ phần trước @ của email
       const generatedUsername = formData.email.split('@')[0];
 
       const response = await fetch(`${API_BASE_URL}/auth/signup`, {
@@ -117,8 +120,8 @@ export function useSignupForm() {
           email: formData.email,
           password: formData.password,
           fullName: formData.fullName, 
-          accountType: formData.role, // Ánh xạ role từ form UI vào accountType
-          roles: ["user"] // Set role mặc định theo hệ thống
+          accountType: formData.role, 
+          roles: ["user"] 
         }),
       });
 
@@ -128,7 +131,6 @@ export function useSignupForm() {
         throw new Error(data.message || t("auth.errors.signupFailed", "Đăng ký thất bại."));
       }
 
-      // 3. Đăng ký thành công -> Điều hướng sang luồng xác thực email
       router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
       
     } catch (err: any) {
@@ -138,10 +140,47 @@ export function useSignupForm() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // Placeholder for Google Sign-In
-    console.log("Google Sign-In clicked");
-    // Will be implemented later with actual Google OAuth
+  // Cập nhật hàm xử lý Google Login
+  const handleGoogleSuccess = async (
+    tokenResponse: Omit<TokenResponse, "error" | "error_description" | "error_uri">
+  ) => {
+    const accessToken = tokenResponse.access_token;
+
+    if (!accessToken) {
+      setApiError(
+        t("auth.errors.googleTokenMissing", {
+          defaultValue: "Không nhận được Access Token từ Google. Vui lòng thử lại.",
+        }),
+      );
+      return;
+    }
+
+    setIsLoading(true);
+    setApiError(null);
+
+    try {
+      // Gọi đúng hàm sử dụng Access Token
+      const data = await signInWithGoogleAccessToken(accessToken);
+      persistAuthSession(data);
+      router.push(getRedirectPathByRoles(data.roles || []));
+    } catch (error) {
+      console.error("Lỗi đăng ký/đăng nhập Google:", error);
+      setApiError(
+        error instanceof Error
+          ? error.message
+          : t("auth.errors.serverError", { defaultValue: "Có lỗi xảy ra từ máy chủ. Vui lòng thử lại sau." }),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setApiError(
+      t("auth.errors.googleSignInFailed", {
+        defaultValue: "Không thể đăng nhập bằng Google. Vui lòng thử lại.",
+      }),
+    );
   };
 
   return {
@@ -149,14 +188,16 @@ export function useSignupForm() {
     router,
     formData,
     errors,
-    isLoading, // Export thêm isLoading để disable nút bấm trên UI
-    apiError,  // Export thêm apiError để hiển thị lỗi từ server trên UI
+    isLoading, 
+    apiError,  
     showPassword,
     setShowPassword,
     showConfirmPassword,
     setShowConfirmPassword,
     handleInputChange,
     handleSignup,
-    handleGoogleSignIn,
+    handleGoogleSuccess,
+    handleGoogleError,
+    isGoogleAuthConfigured,
   };
 }
