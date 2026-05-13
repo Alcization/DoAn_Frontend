@@ -18,9 +18,12 @@ export const getWeatherFrequency = async () => {
 };
 
 
-export const getReportKPI = async (timeRange: string) => {
+export const getReportKPI = async (timeRange: string, routeId?: number) => {
+  const params: Record<string, any> = { timeRange };
+  if (routeId) params.routeId = routeId;
+
   return handleRequest(
-    () => apiClient.get('/business/kpi', { params: { timeRange } }).then(res => res.data),
+    () => apiClient.get('/business/kpi', { params }).then(res => res.data),
     REPORT_KPI_BASE
   );
 };

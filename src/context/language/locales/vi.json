@@ -643,7 +643,8 @@
       "avgRain": "Lượng mưa",
       "avgHumidity": "Độ ẩm",
       "avgWind": "Sức gió",
-      "alertCount": "Số cảnh báo"
+      "alertCount": "Số cảnh báo",
+      "selectRoute": "Chọn tuyến đường để xem chi tiết"
     },
     "filters": {
       "title": "Bộ lọc",

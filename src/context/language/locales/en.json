@@ -615,7 +615,8 @@
       "avgRain": "Rainfall",
       "avgHumidity": "Humidity",
       "avgWind": "Wind",
-      "alertCount": "Alert Count"
+      "alertCount": "Alert Count",
+      "selectRoute": "Select a route to view detailed analysis"
     },
     "filters": {
       "title": "Filters",

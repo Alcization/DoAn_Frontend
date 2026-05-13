@@ -54,7 +54,7 @@ export default function BusinessReports() {
         </button>
       </div>
 
-      <KPISection timeRange={filters.timeRange} />
+      <KPISection timeRange={filters.timeRange} route={activeRoute} />
 
       <ReportFilters 
         filters={filters} 
