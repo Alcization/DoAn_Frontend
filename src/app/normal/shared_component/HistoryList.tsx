@@ -51,6 +51,45 @@ export default function HistoryList({ dateFilter = "" }: HistoryListProps) {
     goToPage,
   } = usePagination(filteredHistoryItems, ITEMS_PER_PAGE);
 
+  const getPaginationRange = (current: number, total: number, windowSize: number = 10) => {
+    const DOTS = "DOTS" as const;
+    if (total <= windowSize) return Array.from({ length: total }, (_, i) => i + 1);
+
+    const leftOffset = Math.floor((windowSize - 1) / 2);
+    const rightOffset = windowSize - 1 - leftOffset;
+
+    let start = current - leftOffset;
+    let end = current + rightOffset;
+
+    if (start < 1) {
+      start = 1;
+      end = Math.min(windowSize, total);
+    }
+
+    if (end > total) {
+      end = total;
+      start = Math.max(1, total - windowSize + 1);
+    }
+
+    const pages: (number | typeof DOTS)[] = [];
+
+    if (start > 1) {
+      pages.push(1);
+      if (start > 2) pages.push(DOTS);
+    }
+
+    for (let p = start; p <= end; p++) pages.push(p);
+
+    if (end < total) {
+      if (end < total - 1) pages.push(DOTS);
+      pages.push(total);
+    }
+
+    return pages;
+  };
+
+  const visiblePages = useMemo(() => getPaginationRange(currentPage, totalPages, 10), [currentPage, totalPages]);
+
   useEffect(() => {
     const fetchHistory = async () => {
       try {
@@ -154,19 +193,23 @@ export default function HistoryList({ dateFilter = "" }: HistoryListProps) {
           </button>
           
           <div className="flex items-center gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => goToPage(page)}
-                className={`w-10 h-10 rounded-xl font-bold transition-all ${
-                  currentPage === page
-                    ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20"
-                    : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            {visiblePages.map((p, idx) =>
+              typeof p === "number" ? (
+                <button
+                  key={p}
+                  onClick={() => goToPage(p)}
+                  className={`w-10 h-10 rounded-xl font-bold transition-all ${
+                    currentPage === p
+                      ? "bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20"
+                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg)]"
+                  }`}
+                >
+                  {p}
+                </button>
+              ) : (
+                <span key={`dots-${idx}`} className="w-10 h-10 flex items-center justify-center text-[var(--color-text-secondary)]">…</span>
+              )
+            )}
           </div>
 
           <button
