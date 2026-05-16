@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import type { TFunction } from "i18next";
 import { ReportConfig, ReportHistoryItem } from "../component/report-logic/ReportTypes";
-import { REPORT_HISTORY } from "../../../context/services/mock/government/reports";
 import { apiClient } from "@/services/api-config";
 import { getGovernmentIncidentHistory } from "../../../context/services/api/government/history-incidents";
 import { downloadAlertsEventsReportPdf } from "../component/report-logic/reportPdf";
@@ -21,6 +20,14 @@ interface ReportSchedule {
   email: string;
 }
 
+interface ReportHistoryResponseItem {
+  id: number;
+  user_id: number;
+  name: string;
+  time: string;
+  link: string;
+}
+
 /**
  * [FACADE / MEDIATOR PATTERN] - useReportManagement: Manages report configuration and history state.
  * Adheres to SRP by centralizing business logic for the reports module.
@@ -33,10 +40,11 @@ export function useReportManagement() {
     email: "bao_cao@donvi.gov.vn",
   });
 
-  const [history] = useState<ReportHistoryItem[]>(REPORT_HISTORY as ReportHistoryItem[]);
+  const [history, setHistory] = useState<ReportHistoryItem[]>([]);
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const setFrequency = useCallback((frequency: "weekly" | "monthly") => {
     setConfig((prev) => ({
@@ -115,6 +123,34 @@ export function useReportManagement() {
     loadSavedConfig();
   }, [loadSavedConfig]);
 
+  const loadReportHistory = useCallback(async () => {
+    setIsLoadingHistory(true);
+
+    try {
+      const response = await apiClient.get<{ items?: ReportHistoryResponseItem[] }>("/users/me/report-history", {
+        params: { page: 1, limit: 20 },
+      });
+
+      const items = Array.isArray(response.data?.items) ? response.data.items : [];
+      setHistory(items.map((item) => ({
+        id: item.id,
+        user_id: item.user_id,
+        name: item.name,
+        time: item.time,
+        link: item.link,
+      })));
+    } catch (error) {
+      console.error("Không thể tải danh sách báo cáo:", error);
+      setHistory([]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadReportHistory();
+  }, [loadReportHistory]);
+
   const saveConfig = useCallback(async (t: TFunction) => {
     if (!config.email?.trim()) {
       alert("Vui lòng nhập email nhận báo cáo.");
@@ -171,6 +207,7 @@ export function useReportManagement() {
     toggleTopic,
     setAllTopics,
     isLoadingConfig,
+    isLoadingHistory,
     isSavingConfig,
     isGeneratingReport,
     saveConfig,

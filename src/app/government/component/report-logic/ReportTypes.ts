@@ -9,9 +9,10 @@ export interface ReportConfig {
 
 export interface ReportHistoryItem {
   id: number;
-  typeKey: string;
-  date: string;
-  status: "sent" | "failed" | "pending";
+  user_id: number;
+  name: string;
+  time: string;
+  link: string;
 }
 
 export interface ReportTopic {

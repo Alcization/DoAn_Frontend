@@ -12,6 +12,7 @@ export default function AdminReports() {
   const {
       config,
       history,
+      isLoadingHistory,
       setFrequency,
       setDay,
       setEmail,
@@ -42,7 +43,7 @@ export default function AdminReports() {
             saveConfig={saveConfig}
             generateReport={generateReport}
         />
-        <ReportHistoryList history={history} />
+        <ReportHistoryList history={history} isLoading={isLoadingHistory} />
       </section>
     </div>
   );
