@@ -13,6 +13,7 @@ import { useReportFilters } from "../../hooks/useReportFilters";
 
 export default function BusinessReports() {
   const { t } = useTranslation();
+  const printModeClass = "print-business-report";
   
   const {
     filters,
@@ -29,14 +30,29 @@ export default function BusinessReports() {
   }, [filters.selectedRoute, routes]);
 
   const handleDownloadReport = () => {
+    const body = document.body;
+    let cleanedUp = false;
+
+    const cleanupPrintMode = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      body.classList.remove(printModeClass);
+      window.removeEventListener("afterprint", cleanupPrintMode);
+    };
+
+    body.classList.add(printModeClass);
+    window.addEventListener("afterprint", cleanupPrintMode);
     window.print();
+
+    // Fallback for browsers that do not reliably dispatch afterprint.
+    setTimeout(cleanupPrintMode, 1000);
   };
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 bg-(--color-bg) min-h-[calc(100vh-80px)]">
+    <div className="business-reports-page flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 bg-(--color-bg) min-h-[calc(100vh-80px)]">
       
       {/* Page Header with Download Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-(--color-surface) p-4 sm:p-6 rounded-3xl shadow-(--shadow-sm) border border-(--color-border)">
+      <div className="report-no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-(--color-surface) p-4 sm:p-6 rounded-3xl shadow-(--shadow-sm) border border-(--color-border)">
         <div>
           <h1 className="text-(--text-2xl) font-bold text-(--color-text-primary) m-0">
             {t("reports.header.title")}
@@ -54,32 +70,38 @@ export default function BusinessReports() {
         </button>
       </div>
 
-      <KPISection timeRange={filters.timeRange} route={activeRoute} />
+      <section className="report-print-area flex flex-col gap-4 sm:gap-6">
+        <KPISection timeRange={filters.timeRange} route={activeRoute} />
 
-      <ReportFilters 
-        filters={filters} 
-        handleFilterChange={handleFilterChange} 
-        showCustomDateRange={showCustomDateRange} 
-        setShowCustomDateRange={setShowCustomDateRange}
-        onRoutesLoaded={setRoutes}
-      />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <WeatherTrendChart 
+              timeRange={filters.timeRange} 
+              lat={activeRoute?.start_point.lat}
+              lng={activeRoute?.start_point.lng}
+          />
+          <WeatherFrequencyChart 
+              timeRange={filters.timeRange}
+              lat={activeRoute?.start_point.lat}
+              lng={activeRoute?.start_point.lng}
+          />
+        </div>
+      </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <WeatherTrendChart 
-            timeRange={filters.timeRange} 
-            lat={activeRoute?.start_point.lat}
-            lng={activeRoute?.start_point.lng}
-        />
-        <WeatherFrequencyChart 
-            timeRange={filters.timeRange}
-            lat={activeRoute?.start_point.lat}
-            lng={activeRoute?.start_point.lng}
+      <div className="report-no-print">
+        <ReportFilters 
+          filters={filters} 
+          handleFilterChange={handleFilterChange} 
+          showCustomDateRange={showCustomDateRange} 
+          setShowCustomDateRange={setShowCustomDateRange}
+          onRoutesLoaded={setRoutes}
         />
       </div>
 
-      <ReportSettings />
+      <div className="report-no-print contents">
+        <ReportSettings />
 
-      <RiskAssessment />
+        <RiskAssessment />
+      </div>
     </div>
   );
 }

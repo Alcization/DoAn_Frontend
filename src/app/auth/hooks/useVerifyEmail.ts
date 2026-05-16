@@ -8,6 +8,7 @@ export function useVerifyEmail() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
+  const flow = searchParams.get("flow") || "signup";
 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
@@ -85,7 +86,12 @@ export function useVerifyEmail() {
 
       if (data.ok) {
         console.log("Verified email successfully:", email);
-        router.push(`/auth/new-password?email=${encodeURIComponent(email)}`);
+        if (flow === "forgot-password") {
+          router.push(`/auth/new-password?email=${encodeURIComponent(email)}`);
+          return;
+        }
+
+        router.push('/auth/login');
       }
     } catch (err: any) {
       setError(err.message);

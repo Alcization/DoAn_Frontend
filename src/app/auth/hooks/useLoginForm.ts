@@ -109,7 +109,7 @@ export function useLoginForm() {
       setErrors((prev) => ({ ...prev, email: t("auth.errors.emailInvalid", { defaultValue: "Invalid email" }) }));
       return;
     }
-    router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
+    router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}&flow=forgot-password`);
   };
 
   // Cập nhật tham số nhận vào là Omit<TokenResponse,...> thay vì CredentialResponse

@@ -56,7 +56,7 @@ export default function ViewAllFavoritesModal({ isOpen, onClose, mode, data }: V
                       <p className="font-semibold text-(--color-text-primary) mb-1 truncate">
                         {loc.name}
                       </p>
-                      <p className="text-sm text-(--color-text-muted) truncate">
+                      <p className="w-56 text-sm text-(--color-text-muted) whitespace-normal break-words">
                         {loc.address}
                       </p>
                     </div>

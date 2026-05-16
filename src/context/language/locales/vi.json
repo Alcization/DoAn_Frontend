@@ -100,6 +100,7 @@
   },
   "common": {
     "welcome": "Chào mừng đến với SWTIS",
+    "loading": "Đang tải...",
     "language": "Ngôn ngữ",
     "theme": "Giao diện",
     "profile": "Hồ sơ",
@@ -294,7 +295,7 @@
       "reset": "Đặt lại"
     },
     "list": {
-        "found": "bản ghi phù hợp",
+        "found": "cảnh báo phù hợp",
         "mapView": "Hiển thị điểm sự cố"
     },
     "detail": {
@@ -310,7 +311,8 @@
         "rain": "Mưa",
         "flood": "Ngập",
         "storm": "Bão",
-        "traffic": "Giao thông"
+        "traffic": "Giao thông",
+        "other": "Khác"
     },
     "severity": {
         "High": "Cao",
@@ -671,7 +673,10 @@
         "rain": "Mưa",
         "heavyRain": "Mưa lớn",
         "cloudy": "Nhiều mây",
-        "extremeTemp": "Nhiệt độ cao"
+        "extremeTemp": "Nhiệt độ cao",
+        "strongWind": "Gió mạnh",
+        "fog": "Sương mù",
+        "clearCloudy": "Trời quang đãng / Không mây"
       }
     },
     "settings": {
@@ -808,6 +813,7 @@
     "chart": {
       "alertsByRegion": "Cảnh báo theo khu vực",
       "alertDistribution": "Phân bố loại cảnh báo",
+      "riskDistribution": "Phân bố cấp độ rủi ro",
       "weatherTrend": "Xu hướng thời tiết",
       "totalAlerts": "Tổng cảnh báo",
       "rain": "Mưa lớn",

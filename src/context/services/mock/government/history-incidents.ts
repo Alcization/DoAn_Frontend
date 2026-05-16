@@ -1,4 +1,4 @@
-export type IncidentType = "rain" | "flood" | "storm" | "traffic";
+export type IncidentType = "rain" | "flood" | "storm" | "traffic" | "other";
 export type IncidentSeverity = "High" | "Medium" | "Low";
 export type IncidentStatus = "Handled" | "Pending";
 

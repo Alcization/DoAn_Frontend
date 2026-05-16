@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
+import type { TFunction } from "i18next";
 import { ReportConfig, ReportHistoryItem } from "../component/report-logic/ReportTypes";
 import { REPORT_HISTORY } from "../../../context/services/mock/government/reports";
 import { apiClient } from "@/services/api-config";
+import { getGovernmentIncidentHistory } from "../../../context/services/api/government/history-incidents";
+import { downloadAlertsEventsReportPdf } from "../component/report-logic/reportPdf";
 
 // Map from Vietnamese report names to topic IDs
 const TOPIC_NAME_MAP: Record<string, string> = {
@@ -33,6 +36,7 @@ export function useReportManagement() {
   const [history] = useState<ReportHistoryItem[]>(REPORT_HISTORY as ReportHistoryItem[]);
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const setFrequency = useCallback((frequency: "weekly" | "monthly") => {
     setConfig((prev) => ({
@@ -111,7 +115,7 @@ export function useReportManagement() {
     loadSavedConfig();
   }, [loadSavedConfig]);
 
-  const saveConfig = useCallback(async (t: any) => {
+  const saveConfig = useCallback(async (t: TFunction) => {
     if (!config.email?.trim()) {
       alert("Vui lòng nhập email nhận báo cáo.");
       return;
@@ -136,12 +140,27 @@ export function useReportManagement() {
 
       await Promise.all(requests);
       alert(t("reports.config.savedMessage"));
-    } catch (error: any) {
-      alert(error?.response?.data?.message || error?.message || "Lưu cấu hình báo cáo thất bại.");
+    } catch (error: unknown) {
+      const maybeError = error as { response?: { data?: { message?: string } }; message?: string };
+      alert(maybeError?.response?.data?.message || maybeError?.message || "Lưu cấu hình báo cáo thất bại.");
     } finally {
       setIsSavingConfig(false);
     }
   }, [config]);
+
+  const generateReport = useCallback(async () => {
+    setIsGeneratingReport(true);
+
+    try {
+      const incidents = await getGovernmentIncidentHistory();
+      await downloadAlertsEventsReportPdf(incidents);
+    } catch (error) {
+      console.error("Không thể tạo báo cáo PDF:", error);
+      alert("Không thể tạo báo cáo PDF. Vui lòng thử lại.");
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  }, []);
 
   return {
     config,
@@ -153,6 +172,8 @@ export function useReportManagement() {
     setAllTopics,
     isLoadingConfig,
     isSavingConfig,
+    isGeneratingReport,
     saveConfig,
+    generateReport,
   };
 }

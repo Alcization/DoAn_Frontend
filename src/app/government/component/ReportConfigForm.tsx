@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Calendar, Mail, Save, Send, ChevronDown } from "lucide-react";
 import { REPORT_TOPICS } from "../../../context/services/mock/government/reports";
 import { FREQUENCY_STRATEGY } from "./report-logic/ReportStrategies";
@@ -13,7 +14,9 @@ interface ReportConfigFormProps {
   setAllTopics: (topicIds: string[]) => void;
   isLoadingConfig: boolean;
   isSavingConfig: boolean;
-  saveConfig: (t: any) => Promise<void>;
+  isGeneratingReport: boolean;
+  saveConfig: (t: TFunction) => Promise<void>;
+  generateReport: () => Promise<void>;
 }
 
 /**
@@ -28,7 +31,9 @@ export default function ReportConfigForm({
   setAllTopics,
   isLoadingConfig,
   isSavingConfig,
+  isGeneratingReport,
   saveConfig,
+  generateReport,
 }: ReportConfigFormProps) {
   const { t } = useTranslation();
   const currentFrequencyStrategy = FREQUENCY_STRATEGY[config.frequency];
@@ -50,6 +55,7 @@ export default function ReportConfigForm({
           </label>
           <div className="flex rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden text-[var(--text-sm)]">
             <button
+              type="button"
               className={`flex-1 px-4 py-3 font-semibold transition-colors ${
                 config.frequency === "weekly"
                   ? "bg-(--color-primary) text-(--color-surface)"
@@ -60,6 +66,7 @@ export default function ReportConfigForm({
               {t("reports.config.weekly")}
             </button>
             <button
+              type="button"
               className={`flex-1 px-4 py-3 font-semibold transition-colors ${
                 config.frequency === "monthly"
                   ? "bg-(--color-primary) text-(--color-surface)"
@@ -152,14 +159,20 @@ export default function ReportConfigForm({
       {/* Buttons */}
       <div className="flex flex-wrap gap-3">
         <button
+          type="button"
           onClick={() => saveConfig(t)}
           disabled={isLoadingConfig || isSavingConfig}
           className="inline-flex items-center gap-2 rounded-md bg-(--color-primary) px-5 py-3 font-semibold text-(--color-surface) hover:opacity-90 transition-opacity"
         >
           <Save size={16} /> {isLoadingConfig ? "Đang tải..." : isSavingConfig ? "Đang lưu..." : t("reports.config.saveBtn")}
         </button>
-        <button className="inline-flex items-center gap-2 rounded-md border border-(--color-border) px-5 py-3 font-semibold text-(--color-text-secondary) hover:border-(--color-primary-soft) hover:text-(--color-primary) transition-colors">
-          <Send size={16} /> {t("reports.config.createBtn")}
+        <button
+          type="button"
+          onClick={generateReport}
+          disabled={isLoadingConfig || isSavingConfig || isGeneratingReport}
+          className="inline-flex items-center gap-2 rounded-md border border-(--color-border) px-5 py-3 font-semibold text-(--color-text-secondary) hover:border-(--color-primary-soft) hover:text-(--color-primary) transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Send size={16} /> {isGeneratingReport ? "Đang tạo PDF..." : t("reports.config.createBtn")}
         </button>
       </div>
     </div>

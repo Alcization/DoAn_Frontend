@@ -44,7 +44,8 @@ const normalizeAlertType = (alertType: string): IncidentType => {
     if (normalized === 'rain' || normalized === 'mưa') return 'rain';
     if (normalized === 'storm' || normalized === 'bão') return 'storm';
     if (normalized === 'traffic' || normalized === 'giao thông') return 'traffic';
-    return 'traffic'; // default fallback
+    if (normalized === 'other' || normalized === 'khác' || normalized === 'khac') return 'other';
+    return 'other'; // default fallback for unknown categories
 };
 
 /**

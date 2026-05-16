@@ -25,7 +25,7 @@ export default function ChartsView({ totalAlerts, heatmapData }: { totalAlerts: 
         <BarChartStrategy data={barData} />
       </ChartWidget>
 
-      <ChartWidget title={t("dashboard.chart.alertDistribution")} Icon={PieChart}>
+      <ChartWidget title={t("dashboard.chart.riskDistribution")} Icon={PieChart}>
         <PieChartStrategy data={pieData} totalAlerts={totalAlerts} />
       </ChartWidget>
 

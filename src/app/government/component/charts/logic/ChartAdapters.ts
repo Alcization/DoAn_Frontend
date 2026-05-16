@@ -1,14 +1,5 @@
-import {
-  PIE_CHART_DATA,
-  LINE_CHART_POINTS,
-} from "../../../../../context/services/mock/government/dashboard";
+import { LINE_CHART_POINTS } from "../../../../../context/services/mock/government/dashboard";
 import { IChartDataPoint } from "./ChartTypes";
-
-interface PieChartSlice {
-  labelKey: string;
-  value: number;
-  color: string;
-}
 
 /**
  * [ADAPTER PATTERN] - Adapters to transform various data sources into a unified IChartData format.
@@ -25,12 +16,41 @@ export class BarChartDataAdapter {
 }
 
 export class PieChartDataAdapter {
-  static adapt(): IChartDataPoint[] {
-    return (PIE_CHART_DATA as PieChartSlice[]).map(slice => ({
-      label: slice.labelKey,
-      value: slice.value,
-      color: slice.color
-    }));
+  static adapt(heatmapData: any[]): IChartDataPoint[] {
+    const total = heatmapData.reduce((sum, area) => sum + (area.alerts || 0), 0);
+    const riskBuckets = heatmapData.reduce<Record<"low" | "medium" | "high", number>>(
+      (acc, area) => {
+        const risk = area.risk as "low" | "medium" | "high";
+        if (risk in acc) {
+          acc[risk] += area.alerts || 0;
+        }
+        return acc;
+      },
+      { low: 0, medium: 0, high: 0 }
+    );
+
+    const toPercent = (value: number) => {
+      if (total === 0) return 0;
+      return Math.round((value / total) * 100);
+    };
+
+    return [
+      {
+        label: "dashboard.map.risk.low",
+        value: toPercent(riskBuckets.low),
+        color: "var(--color-success)",
+      },
+      {
+        label: "dashboard.map.risk.medium",
+        value: toPercent(riskBuckets.medium),
+        color: "var(--color-warning)",
+      },
+      {
+        label: "dashboard.map.risk.high",
+        value: toPercent(riskBuckets.high),
+        color: "var(--color-danger)",
+      },
+    ];
   }
 }
 
@@ -47,7 +67,7 @@ export class ChartDataFactory {
   static getData(type: string, heatmapData: any[]): IChartDataPoint[] {
     switch (type) {
       case "bar": return BarChartDataAdapter.adapt(heatmapData);
-      case "pie": return PieChartDataAdapter.adapt();
+      case "pie": return PieChartDataAdapter.adapt(heatmapData);
       case "line": return LineChartDataAdapter.adapt();
       default: return [];
     }

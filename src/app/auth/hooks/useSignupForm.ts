@@ -131,7 +131,7 @@ export function useSignupForm() {
         throw new Error(data.message || t("auth.errors.signupFailed", "Đăng ký thất bại."));
       }
 
-      router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
+      router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}&flow=signup`);
       
     } catch (err: any) {
       setApiError(err.message);

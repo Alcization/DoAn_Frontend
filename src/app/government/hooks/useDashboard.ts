@@ -38,6 +38,7 @@ type IncidentLike = {
   area: string;
   type: string;
   time: string;
+  severity: "High" | "Medium" | "Low";
 };
 
 type WeatherMetrics = {
@@ -64,9 +65,15 @@ const parseIncidentDate = (time: string): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const inferRisk = (alertCount: number): HeatmapArea["risk"] => {
-  if (alertCount >= 15) return "high";
-  if (alertCount >= 6) return "medium";
+const severityRank: Record<IncidentLike["severity"], number> = {
+  Low: 1,
+  Medium: 2,
+  High: 3,
+};
+
+const rankToRisk = (rank: number): HeatmapArea["risk"] => {
+  if (rank >= severityRank.High) return "high";
+  if (rank >= severityRank.Medium) return "medium";
   return "low";
 };
 
@@ -202,6 +209,13 @@ export const useDashboard = () => {
       return acc;
     }, {});
 
+    const areaRiskRank = incidentsInScope.reduce<Record<string, number>>((acc, incident) => {
+      const key = normalizeText(incident.area || "");
+      const nextRank = severityRank[incident.severity] || severityRank.Low;
+      acc[key] = Math.max(acc[key] || 0, nextRank);
+      return acc;
+    }, {});
+
     const mergedData = originalHeatmapData.map((area) => {
       const alerts = areaAlertCount[normalizeText(area.name)] || 0;
       const weather = weatherByAreaAndTime[`${area.id}_${filters.timeframe}`];
@@ -209,7 +223,7 @@ export const useDashboard = () => {
       return {
         ...area,
         alerts,
-        risk: inferRisk(alerts),
+        risk: rankToRisk(areaRiskRank[normalizeText(area.name)] || 0),
         rainfall: weather?.rainfall ?? area.rainfall,
         wind: weather?.wind ?? area.wind,
         temp: weather?.temp ?? area.temp,

@@ -3,7 +3,7 @@
 import { useTranslation } from "react-i18next";
 import { TrendingUp, PieChart, Loader2 } from "lucide-react";
 import { useMemo, useState, useRef, useEffect } from "react";
-import { WEATHER_DISTRIBUTION, CHART_SERIES } from "@/context/services/mock/normal/business/reports";
+import { CHART_SERIES } from "@/context/services/mock/normal/business/reports";
 import { useTheme } from "@/context/theme/ThemeContext";
 
 // --- CUSTOM HOOK LẤY DỮ LIỆU TỪ OPENWEATHER HISTORY 2.5 ---
@@ -30,11 +30,12 @@ export function useOpenWeatherHistory(lat?: number, lng?: number, timeRange: str
       setIsLoading(true);
       setError(null);
       try {
-        const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || "YOUR_API_KEY";
+        const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
         
         const end = Math.floor(Date.now() / 1000);
         const start = timeRange === "24h" ? end - 86400 : end - 604800;
 
+        // console.log(`Fetching weather history for lat=${lat}, lng=${lng}, start=${start}, end=${end}`);
         const url = `https://history.openweathermap.org/data/2.5/history/city?lat=${lat}&lon=${lng}&type=hour&start=${start}&end=${end}&units=metric&appid=${API_KEY}`;
 
         const response = await fetch(url);
@@ -334,31 +335,37 @@ export function WeatherFrequencyChart({ timeRange, lat, lng }: WeatherFrequencyC
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  const getWeatherTypeLabel = (name: string) => {
+    const key = `businessReports.charts.types.${name}`;
+    if (name === "clearCloudy") return t(key, "Trời quang/mây");
+    return t(key);
+  };
+
   const { chartData, isLoading } = useOpenWeatherHistory(lat, lng, timeRange);
 
   const distributionData = useMemo(() => {
-    if (!chartData.length) return WEATHER_DISTRIBUTION;
-
     let heavyRain = 0;
     let strongWind = 0;
     let extremeTemp = 0;
     let fog = 0;
+    let clearCloudy = 0;
 
     chartData.forEach(d => {
       if ((d.weatherId >= 200 && d.weatherId < 600) || d.rain > 5) heavyRain++;
-      if (d.wind > 10) strongWind++;
-      if (d.temp > 35 || d.temp < 10) extremeTemp++;
-      if (d.weatherId >= 700 && d.weatherId < 800) fog++;
+      else if (d.wind > 10) strongWind++;
+      else if (d.temp > 30 || d.temp < 10) extremeTemp++;
+      else if (d.weatherId >= 700 && d.weatherId < 800) fog++;
+      else if (d.weatherId >= 800 && d.weatherId <= 804) clearCloudy++;
+      else clearCloudy++;
     });
 
-    const data = [
+    return [
       { name: "heavyRain", value: heavyRain, colorLight: "#3B82F6", colorDark: "#60A5FA" },
-      { name: "strongWind", value: strongWind, colorLight: "#10B981", colorDark: "#34D399" },
+      { name: "strongWind", value: strongWind, colorLight: "#F59E0B", colorDark: "#FBBF24" },
       { name: "extremeTemp", value: extremeTemp, colorLight: "#EF4444", colorDark: "#F87171" },
-      { name: "fog", value: fog, colorLight: "#8B5CF6", colorDark: "#A78BFA" }
-    ].filter(item => item.value > 0);
-
-    return data.length > 0 ? data : WEATHER_DISTRIBUTION;
+      { name: "fog", value: fog, colorLight: "#8B5CF6", colorDark: "#A78BFA" },
+      { name: "clearCloudy", value: clearCloudy, colorLight: "#10B981", colorDark: "#34D399" }
+    ];
   }, [chartData]);
 
   const totalBadWeather = distributionData.reduce((sum: number, item: any) => sum + item.value, 0);
@@ -430,7 +437,7 @@ export function WeatherFrequencyChart({ timeRange, lat, lng }: WeatherFrequencyC
                               className="transition-all hover:opacity-80"
                               style={{ cursor: "pointer" }}
                             />
-                            <title>{`${t(`businessReports.charts.types.${item.name}`)}: ${item.percentage.toFixed(1)}%`}</title>
+                            <title>{`${getWeatherTypeLabel(item.name)}: ${item.percentage.toFixed(1)}%`}</title>
                           </g>
                         );
                       });
@@ -454,7 +461,7 @@ export function WeatherFrequencyChart({ timeRange, lat, lng }: WeatherFrequencyC
                   >
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-4 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-(--text-sm) text-(--color-text-primary)">{t(`businessReports.charts.types.${item.name}`)}</span>
+                      <span className="text-(--text-sm) text-(--color-text-primary)">{getWeatherTypeLabel(item.name)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {/* <span className="text-(--text-xs) text-(--color-text-secondary)">{item.value} {t("businessReports.charts.incidents")}</span> */}
@@ -463,6 +470,12 @@ export function WeatherFrequencyChart({ timeRange, lat, lng }: WeatherFrequencyC
                   </div>
                 ))}
               </div>
+
+          {totalBadWeather === 0 && (
+            <p className="mt-3 text-center text-(--text-sm) text-(--color-text-secondary)">
+              {t("businessReports.charts.noIncidents")}
+            </p>
+          )}
         </>
       )}
     </div>

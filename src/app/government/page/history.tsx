@@ -15,6 +15,7 @@ export default function AdminHistory() {
   const {
     filters,
     setFilters,
+    areaOptions,
     selectedIncident,
     setSelectedIncident,
     viewMode,
@@ -39,6 +40,7 @@ export default function AdminHistory() {
       <HistoryFilters 
         filters={filters} 
         setFilters={setFilters}
+        areaOptions={areaOptions}
         onReset={resetFilters}
         viewMode={viewMode} 
         setViewMode={setViewMode} 

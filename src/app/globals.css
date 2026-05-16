@@ -250,3 +250,34 @@ a:hover {
   border: 1px solid rgba(29, 161, 242, 0.2);
   border-radius: 50%;
 }
+
+/* Report page print mode: only keep KPI and weather charts. */
+@media print {
+  body.print-business-report * {
+    visibility: hidden !important;
+  }
+
+  body.print-business-report .business-reports-page,
+  body.print-business-report .business-reports-page * {
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  body.print-business-report .report-print-area,
+  body.print-business-report .report-print-area * {
+    visibility: visible !important;
+  }
+
+  body.print-business-report .report-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body.print-business-report .report-no-print {
+    display: none !important;
+  }
+}

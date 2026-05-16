@@ -287,7 +287,8 @@
         "rain": "Rain",
         "flood": "Flood",
         "storm": "Storm",
-        "traffic": "Traffic"
+      "traffic": "Traffic",
+      "other": "Other"
     },
     "severity": {
         "High": "High",
@@ -643,7 +644,10 @@
         "rain": "Rain",
         "heavyRain": "Heavy Rain",
         "cloudy": "Cloudy",
-        "extremeTemp": "Extreme Temperature"
+        "extremeTemp": "Extreme Temperature",
+        "strongWind": "Strong Wind",
+        "fog": "Fog",
+        "clearCloudy": "Clear"
       }
     },
     "settings": {
@@ -780,6 +784,7 @@
     "chart": {
       "alertsByRegion": "Alerts by Region",
       "alertDistribution": "Alert Type Distribution",
+      "riskDistribution": "Risk Level Distribution",
       "weatherTrend": "Weather Trend",
       "totalAlerts": "Total Alerts",
       "rain": "Heavy Rain",

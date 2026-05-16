@@ -2,17 +2,17 @@
 
 import { useTranslation } from "react-i18next";
 import { Filter, Search, Download, List, Map, RotateCcw } from "lucide-react";
-import { INCIDENTS } from "../../../context/services/mock/government/history-incidents";
 
 interface HistoryFiltersProps {
   filters: any;
   setFilters: (filters: any) => void;
+  areaOptions: string[];
   onReset: () => void;
   viewMode: "list" | "map";
   setViewMode: (mode: "list" | "map") => void;
 }
 
-export default function HistoryFilters({ filters, setFilters, onReset, viewMode, setViewMode }: HistoryFiltersProps) {
+export default function HistoryFilters({ filters, setFilters, areaOptions, onReset, viewMode, setViewMode }: HistoryFiltersProps) {
   const { t } = useTranslation();
 
   const handleFilterChange = (key: string, value: string) => {
@@ -56,7 +56,7 @@ export default function HistoryFilters({ filters, setFilters, onReset, viewMode,
               className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 bg-[var(--color-bg)]/50 focus:border-[var(--color-primary)] focus:outline-none text-[var(--color-text-primary)] appearance-none"
             >
               <option value="all">{t("alertHistory.filter.all")}</option>
-              {[...new Set(INCIDENTS.map((incident) => incident.area))].map((area) => (
+              {areaOptions.map((area) => (
                 <option key={area} value={area}>{area}</option>
               ))}
             </select>
@@ -73,7 +73,7 @@ export default function HistoryFilters({ filters, setFilters, onReset, viewMode,
               className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 bg-[var(--color-bg)]/50 focus:border-[var(--color-primary)] focus:outline-none text-[var(--color-text-primary)] appearance-none"
             >
               <option value="all">{t("alertHistory.filter.all")}</option>
-              {["rain", "flood", "storm", "traffic"].map((type) => (
+              {["rain", "flood", "storm", "traffic", "other"].map((type) => (
                   <option key={type} value={type}>{t(`alertHistory.type.${type}`)}</option>
               ))}
             </select>

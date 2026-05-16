@@ -2,6 +2,12 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { INCIDENTS, Incident } from "../../../context/services/mock/government/history-incidents";
 import { HistoryFilterOptions, ViewMode, HistoryState } from "../component/history-logic/HistoryTypes";
 import { getGovernmentIncidentHistory } from "../../../context/services/api/government/history-incidents";
+import { apiClient } from "@/services/api-config";
+
+type AreaApiResponse = {
+  area_id: number;
+  name: string;
+};
 
 const DEFAULT_FILTERS: HistoryFilterOptions = {
   from: "",
@@ -22,6 +28,7 @@ export function useHistoryManagement() {
     viewMode: "list",
   });
   const [incidents, setIncidents] = useState<Incident[]>(INCIDENTS);
+  const [areaOptions, setAreaOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,17 +38,43 @@ export function useHistoryManagement() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getGovernmentIncidentHistory();
-        setIncidents(data);
-        setState((prev) => ({
-          ...prev,
-          selectedIncident: data[0] || null,
-        }));
+        const [historyResult, areasResult] = await Promise.allSettled([
+          getGovernmentIncidentHistory(),
+          apiClient.get<AreaApiResponse[]>("/admin/areas"),
+        ]);
+
+        if (historyResult.status === "fulfilled") {
+          const historyResponse = historyResult.value;
+          setIncidents(historyResponse);
+          setState((prev) => ({
+            ...prev,
+            selectedIncident: historyResponse[0] || null,
+          }));
+
+          if (areasResult.status !== "fulfilled") {
+            const areasFromHistory = Array.from(new Set(historyResponse.map((incident) => incident.area)));
+            setAreaOptions(areasFromHistory);
+          }
+        } else {
+          setError("Failed to fetch incidents");
+          setIncidents(INCIDENTS);
+        }
+
+        if (areasResult.status === "fulfilled") {
+          const realAreas = (areasResult.value.data || [])
+            .map((area) => area?.name?.trim())
+            .filter((name): name is string => Boolean(name));
+
+          setAreaOptions(Array.from(new Set(realAreas)));
+        } else if (historyResult.status !== "fulfilled") {
+          setAreaOptions([]);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
         console.error("Failed to fetch incidents:", err);
         // Keep using mock data if API fails
         setIncidents(INCIDENTS);
+        setAreaOptions([]);
       } finally {
         setLoading(false);
       }
@@ -88,6 +121,7 @@ export function useHistoryManagement() {
     ...state,
     filteredIncidents,
     incidents,
+    areaOptions,
     loading,
     error,
     setFilters,

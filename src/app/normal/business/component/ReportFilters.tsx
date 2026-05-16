@@ -132,7 +132,7 @@ export default function ReportFilters({
               className="w-full px-3.5 py-3 pr-10 rounded-xl border border-(--color-border) text-(--text-sm) sm:text-(--text-base) bg-(--color-bg) text-(--color-text-primary) hover:border-(--color-primary) transition-colors focus:outline-none appearance-none"
             >
               <option value="24h">24h</option>
-              <option value="7days">7 Days</option>
+              <option value="7days">7 ngày</option>
             </select>
             <ChevronDown
               size={18}

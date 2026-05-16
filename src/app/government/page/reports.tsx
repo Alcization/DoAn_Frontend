@@ -19,7 +19,9 @@ export default function AdminReports() {
       setAllTopics,
       isLoadingConfig,
       isSavingConfig,
+        isGeneratingReport,
       saveConfig,
+        generateReport,
   } = useReportManagement();
 
   return (
@@ -36,7 +38,9 @@ export default function AdminReports() {
             setAllTopics={setAllTopics}
             isLoadingConfig={isLoadingConfig}
             isSavingConfig={isSavingConfig}
+            isGeneratingReport={isGeneratingReport}
             saveConfig={saveConfig}
+            generateReport={generateReport}
         />
         <ReportHistoryList history={history} />
       </section>
