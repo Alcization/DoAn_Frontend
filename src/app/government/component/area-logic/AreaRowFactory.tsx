@@ -1,5 +1,4 @@
-import React from "react";
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Bell } from "lucide-react";
 import { ManagedArea } from "./AreaTableTypes";
 import { getHotspotDotClass } from "./AreaTableStrategies";
 
@@ -11,7 +10,8 @@ export class AreaRowFactory {
     area: ManagedArea, 
     t: any, 
     onEdit: (area: ManagedArea) => void, 
-    onDelete: (area: ManagedArea) => void
+    onDelete: (area: ManagedArea) => void,
+    onAlertSetting: (area: ManagedArea) => void
   ) {
     return (
       <tr key={area.id} className="hover:bg-(--color-bg)/50 transition-colors group">
@@ -34,6 +34,13 @@ export class AreaRowFactory {
         </td>
         <td className="p-4 text-right">
           <div className="flex justify-end gap-2">
+            <button 
+              onClick={() => onAlertSetting(area)}
+              className="p-2 rounded-sm border border-(--color-border) hover:bg-(--color-bg) text-[#0b0a08] hover:text-[#242119] transition-all hover:scale-110"
+              title={t("areaManagement.actions.alertSetting", "Alert Setting")}
+            >
+              <Bell size={16} />
+            </button>
             <button 
               onClick={() => onEdit(area)}
               className="p-2 rounded-sm border border-(--color-border) hover:bg-(--color-bg) text-(--color-text-secondary) transition-all hover:scale-110"

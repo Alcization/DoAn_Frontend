@@ -1,6 +1,6 @@
 import { Clock } from "lucide-react";
 import { Incident } from "../../../../context/services/mock/government/history-incidents";
-import { SEVERITY_STRATEGY, STATUS_STRATEGY } from "./HistoryStrategies";
+import { STATUS_STRATEGY } from "./HistoryStrategies";
 
 /**
  * [FACTORY METHOD PATTERN] - HistoryItemFactory: Encapsulates incident item rendering.
@@ -13,7 +13,6 @@ export class HistoryItemFactory {
     t: any
   ) {
     const isSelected = selectedId === incident.id;
-    const severityStyle = SEVERITY_STRATEGY[incident.severity];
     const statusStyle = STATUS_STRATEGY[incident.status];
 
     return (
@@ -27,11 +26,6 @@ export class HistoryItemFactory {
         <div className="flex items-center justify-between text-(--text-xs)">
           <span className="inline-flex items-center gap-1 text-(--color-text-muted)">
             <Clock size={12} /> {incident.time}
-          </span>
-          <span
-            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${severityStyle.className}`}
-          >
-            {t(`alertHistory.severity.${incident.severity}`)}
           </span>
         </div>
         <div className="mt-2 flex items-center justify-between gap-3">

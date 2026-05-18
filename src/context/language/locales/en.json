@@ -176,6 +176,17 @@
       "areaStatus": "Area Status",
       "updateArea": "Update Area",
       "editDesc": "Update geographic boundary and area details."
+    },
+    "alertSettingModal": {
+      "title": "Alert & Threshold Settings",
+      "desc": "Set automated alerts for {{name}} when criteria are met.",
+      "tempLabel": "Weather Temperature Alert",
+      "tempDesc": "Notify when regional temperature exceeds threshold",
+      "tempThreshold": "Temperature Threshold",
+      "rainLabel": "Rainfall Warning Alert",
+      "rainDesc": "Notify when hourly rainfall exceeds threshold",
+      "rainThreshold": "Rainfall Threshold",
+      "saveBtn": "Save Configuration"
     }
   },
   "scenarioManagement": {

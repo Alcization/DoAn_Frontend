@@ -78,21 +78,6 @@ export default function HistoryFilters({ filters, setFilters, areaOptions, onRes
               ))}
             </select>
           </div>
-          
-          {/* Severity */}
-           <div className="flex flex-col gap-2">
-            <label className="font-semibold text-[var(--color-text-secondary)]">{t("alertHistory.filter.severity")}</label>
-            <select
-              value={filters.severity}
-              onChange={(e) => handleFilterChange("severity", e.target.value)}
-              className="rounded-[var(--radius-md)] border border-[var(--color-border)] px-4 py-3 bg-[var(--color-bg)]/50 focus:border-[var(--color-primary)] focus:outline-none text-[var(--color-text-primary)] appearance-none"
-            >
-              <option value="all">{t("alertHistory.filter.all")}</option>
-              {["High", "Medium", "Low"].map((sev) => (
-                  <option key={sev} value={sev}>{t(`alertHistory.severity.${sev}`)}</option>
-              ))}
-            </select>
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 pt-2">

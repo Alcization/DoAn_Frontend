@@ -24,10 +24,21 @@ const mapApiTypeToUiType = (areaType: AreaApiModel["area_type"]): ManagedArea["t
   return areaType === "Quận" ? "District" : "Ward";
 };
 
+const getStoredAlertSettings = (areaId: number) => {
+  if (typeof window === "undefined") return null;
+  try {
+    const item = localStorage.getItem(`@swtis_area_alerts_${areaId}`);
+    return item ? JSON.parse(item) : null;
+  } catch {
+    return null;
+  }
+};
+
 const mapAreaApiToManagedArea = (area: AreaApiModel): ManagedArea => {
   const radius = area.management_area?.radius_km ?? 0;
   const centerLng = area.management_area?.center?.lng;
   const centerLat = area.management_area?.center?.lat;
+  const stored = getStoredAlertSettings(area.area_id);
 
   return {
     id: area.area_id,
@@ -42,6 +53,10 @@ const mapAreaApiToManagedArea = (area: AreaApiModel): ManagedArea => {
     hotspotCount: area.hot_points ?? 0,
     boundary: radius > 0 ? `${radius.toFixed(1)} km` : "-",
     status: "active",
+    tempAlertEnabled: stored?.tempAlertEnabled ?? false,
+    tempThreshold: stored?.tempThreshold ?? 35,
+    rainAlertEnabled: stored?.rainAlertEnabled ?? false,
+    rainThreshold: stored?.rainThreshold ?? 50,
   };
 };
 
@@ -171,6 +186,28 @@ export function useAreaTable() {
     }
   }, [toggleModal]);
 
+  const handleSaveAlertSettings = useCallback((areaId: number, settings: {
+    tempAlertEnabled: boolean;
+    tempThreshold: number;
+    rainAlertEnabled: boolean;
+    rainThreshold: number;
+  }) => {
+    localStorage.setItem(`@swtis_area_alerts_${areaId}`, JSON.stringify(settings));
+    setAreas((prev) =>
+      prev.map((item) =>
+        item.areaId === areaId
+          ? {
+              ...item,
+              tempAlertEnabled: settings.tempAlertEnabled,
+              tempThreshold: settings.tempThreshold,
+              rainAlertEnabled: settings.rainAlertEnabled,
+              rainThreshold: settings.rainThreshold,
+            }
+          : item
+      )
+    );
+  }, []);
+
   return {
     ...state,
     ...pagination,
@@ -181,5 +218,6 @@ export function useAreaTable() {
     handleCreate,
     handleEditSave,
     handleDeleteConfirm,
+    handleSaveAlertSettings,
   };
 }

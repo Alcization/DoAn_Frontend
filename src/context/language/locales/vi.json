@@ -200,6 +200,17 @@
       "areaStatus": "Trạng thái khu vực",
       "updateArea": "Cập nhật khu vực",
       "editDesc": "Cập nhật ranh giới địa lý và chi tiết khu vực."
+    },
+    "alertSettingModal": {
+      "title": "Cài đặt Cảnh báo & Ngưỡng",
+      "desc": "Thiết lập cảnh báo tự động cho khu vực {{name}} khi đạt các điều kiện.",
+      "tempLabel": "Cảnh báo Nhiệt độ Thời tiết",
+      "tempDesc": "Thông báo khi nhiệt độ khu vực vượt ngưỡng thiết lập",
+      "tempThreshold": "Ngưỡng nhiệt độ",
+      "rainLabel": "Cảnh báo Ngập lụt do Lượng mưa",
+      "rainDesc": "Thông báo khi lượng mưa theo giờ vượt ngưỡng thiết lập",
+      "rainThreshold": "Ngưỡng lượng mưa",
+      "saveBtn": "Lưu cấu hình"
     }
   },
   "scenarioManagement": {

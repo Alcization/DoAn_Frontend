@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AreaRowFactory } from "./area-logic/AreaRowFactory";
 import { useAreaTable } from "./area-logic/useAreaTable";
@@ -8,6 +8,7 @@ import Pagination from "./Pagination";
 import QuickAddAreaModal from "../modal/QuickAddAreaModal";
 import EditAreaModal from "../modal/EditAreaModal";
 import DeleteAreaModal from "../modal/DeleteAreaModal";
+import AlertSettingModal from "../modal/AlertSettingModal";
 
 /**
  * [FACADE PATTERN] - AreaTable: The primary interface for area management.
@@ -32,11 +33,24 @@ export default function AreaTable() {
     handleCreate,
     handleEditSave,
     handleDeleteConfirm,
+    handleSaveAlertSettings,
   } = useAreaTable();
+
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertArea, setAlertArea] = useState<any>(null);
 
   return (
     <>
       {/* Modals Facade */}
+      <AlertSettingModal
+        isOpen={isAlertOpen}
+        onClose={() => {
+          setIsAlertOpen(false);
+          setAlertArea(null);
+        }}
+        area={alertArea}
+        onSave={handleSaveAlertSettings}
+      />
       <QuickAddAreaModal 
         isOpen={isQuickAddOpen} 
         onClose={() => toggleModal("isQuickAddOpen", false)}
@@ -116,7 +130,11 @@ export default function AreaTable() {
                   area, 
                   t, 
                   (a) => toggleModal("isEditOpen", true, a), 
-                  (a) => toggleModal("isDeleteOpen", true, a)
+                  (a) => toggleModal("isDeleteOpen", true, a),
+                  (a) => {
+                    setAlertArea(a);
+                    setIsAlertOpen(true);
+                  }
                 )
               )}
             </tbody>

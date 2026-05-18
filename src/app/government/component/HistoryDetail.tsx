@@ -4,7 +4,7 @@ import { Incident } from "../../../context/services/mock/government/history-inci
 import { useState, useEffect } from "react";
 import ActivateScenarioModal from "../modal/ActivateScenarioModal";
 import { Scenario } from "../../../context/services/mock/government/scenario-management";
-import { SEVERITY_STRATEGY, STATUS_STRATEGY } from "./history-logic/HistoryStrategies";
+import { STATUS_STRATEGY } from "./history-logic/HistoryStrategies";
 import { getGovernmentResponseScenarioById } from "../../../context/services/api/government/scenario-management";
 
 interface HistoryDetailProps {
@@ -71,11 +71,6 @@ export default function HistoryDetail({ incident }: HistoryDetailProps) {
                 {incident.location}
                 </h2>
                 <div className="flex flex-wrap items-center gap-2 text-(--text-xs)">
-                <span
-                    className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${SEVERITY_STRATEGY[incident.severity].className}`}
-                >
-                    {t("alertHistory.filter.severity")}: {t(`alertHistory.severity.${incident.severity}`)}
-                </span>
                 <span
                     className={`inline-flex items-center gap-2 rounded-full px-3 py-1 font-semibold ${
                       activatedScenario ? STATUS_STRATEGY.Handled.className : STATUS_STRATEGY[incident.status].className

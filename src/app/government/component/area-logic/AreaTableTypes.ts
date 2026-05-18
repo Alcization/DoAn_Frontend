@@ -31,6 +31,10 @@ export interface ManagedArea {
   hotspotCount: number;
   boundary: string;
   status: "active" | "inactive";
+  tempAlertEnabled?: boolean;
+  tempThreshold?: number;
+  rainAlertEnabled?: boolean;
+  rainThreshold?: number;
 }
 
 export interface AreaMutationPayload {
