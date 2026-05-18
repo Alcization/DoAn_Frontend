@@ -236,33 +236,26 @@ export default function MapVisualization() {
 
     const rainySegments = weatherBySegment.filter(w => w.weather === 'rainy').length;
     const cloudySegments = weatherBySegment.filter(w => w.weather === 'cloudy').length;
-    const maxTemp = Math.max(...weatherBySegment.map(w => w.temperatureC || 0));
-    const weatherConditionPercentage = rainySegments / weatherBySegment.length;
+    const sunnyOrClearSegments = weatherBySegment.filter(w => w.weather === 'sunny' || w.weather === 'clear').length;
 
     let delayMinutes = 15;
     let alertMessage = "";
     let hasAlert = false;
     let weatherWarning = "";
 
-    if (weatherConditionPercentage > 0.5) {
-      delayMinutes = Math.ceil(routeInfo.time / 60000 * 0.3) + 15;
-      alertMessage = `⚠️ Thời tiết mưa nặng trong ${rainySegments}/${weatherBySegment.length} đoạn đường - hãy dành thêm thời gian`;
-      hasAlert = true;
-      weatherWarning = "⚠️ Thời tiết mưa nặng";
-    } else if (rainySegments > 0) {
+    if (rainySegments > 0) {
       delayMinutes = 20;
-      alertMessage = `🌧️ Thời tiết mưa trong ${rainySegments} đoạn - đường có thể trơn trượt`;
+      alertMessage = "🌧️ Trời đang mưa, mặt đường có thể trơn trượt. Chưa nên xuất phát ngay lập tức.";
       hasAlert = true;
-      weatherWarning = "🌧️ Thời tiết mưa nhẹ";
-    } else if (maxTemp > 35) {
-      delayMinutes = 20;
-      weatherWarning = "🌡️ Rất nóng (>35°C)";
-      alertMessage = "🌡️ Nhiệt độ cao - hãy đảm bảo xe của bạn ở tình trạng tốt và giữ nước";
-    } else if (maxTemp > 30) {
+      weatherWarning = "🌧️ Trời đang mưa";
+    } else if (cloudySegments > 0) {
       delayMinutes = 15;
-      weatherWarning = `☀️ Nắng (${maxTemp}°C)`;
-    } else if (cloudySegments > weatherBySegment.length / 2) {
-      weatherWarning = "☁️ Nhiều mây";
+      alertMessage = "☁️ Trời nhiều mây, có thể xuất hiện mưa bất chợt. Nên theo dõi thời tiết trước khi đi.";
+      hasAlert = true;
+      weatherWarning = "☁️ Trời nhiều mây";
+    } else if (sunnyOrClearSegments > 0) {
+      delayMinutes = 10;
+      weatherWarning = "☀️ Trời nắng/quang, có thể xuất phát ngay";
     } else {
       weatherWarning = "✓ Thời tiết quang đãng";
     }
@@ -373,7 +366,9 @@ export default function MapVisualization() {
         </div>
 
         {/* Advisory Section with Dynamic Weather Analysis */}
-        <div className={`mb-6 p-4 rounded-[16px] flex items-center justify-between shadow-sm border ${
+        
+        
+        {/* <div className={`mb-6 p-4 rounded-[16px] flex items-center justify-between shadow-sm border ${
           advisory.hasAlert 
             ? 'bg-(--color-warning-bg) border-(--color-warning)/20' 
             : 'bg-(--color-primary-bg) border-(--color-primary)/20'
@@ -394,7 +389,7 @@ export default function MapVisualization() {
           <span className={`text-(--text-sm) font-bold ${advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'}`}>
             {t("map.visualization.startAfter", { minutes: advisory.delayMinutes })}
           </span>
-        </div>
+        </div> */}
 
         {/* Dynamic Weather/Route-Based Alerts */}
         {advisory.hasAlert && advisory.alertMessage && (
@@ -432,12 +427,13 @@ function RouteStatsFacade({ routeInfo, t }: { routeInfo: any, t: any }) {
             : `${Math.round(routeInfo.distance)} m`)
         : "-- km",
       color: "text-(--color-text-primary)"
-    },
-    {
-      label: t("map.visualization.status"),
-      value: routeInfo ? t("map.visualization.safe") : t("map.visualization.clear"),
-      color: routeInfo ? "text-(--color-success)" : "text-(--color-text-muted)"
     }
+    // },
+    // {
+    //   label: t("map.visualization.status"),
+    //   value: routeInfo ? t("map.visualization.safe") : t("map.visualization.clear"),
+    //   color: routeInfo ? "text-(--color-success)" : "text-(--color-text-muted)"
+    // }
   ], [routeInfo, t]);
 
   return (

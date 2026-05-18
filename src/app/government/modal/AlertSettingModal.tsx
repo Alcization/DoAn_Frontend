@@ -3,6 +3,7 @@ import { Bell, Thermometer, CloudRain } from "lucide-react";
 import { ModalItemFactory } from "./logic/ModalItemFactory";
 import { useTranslation } from "react-i18next";
 import { ManagedArea } from "../component/area-logic/AreaTableTypes";
+import { apiClient } from "@/services/api-config";
 
 type AlertSettingModalProps = {
   isOpen: boolean;
@@ -10,9 +11,9 @@ type AlertSettingModalProps = {
   area: ManagedArea | null;
   onSave?: (areaId: number, settings: {
     tempAlertEnabled: boolean;
-    tempThreshold: number;
+    tempThreshold: number | null;
     rainAlertEnabled: boolean;
-    rainThreshold: number;
+    rainThreshold: number | null;
   }) => void;
 };
 
@@ -26,26 +27,75 @@ export default function AlertSettingModal({ isOpen, onClose, area, onSave }: Ale
   const [rainThreshold, setRainThreshold] = useState(50);
 
   useEffect(() => {
-    if (area && isOpen) {
+    let cancelled = false;
+    const loadThresholds = async () => {
+      if (!area || !isOpen) return;
+
+      // Initialize from existing area/local settings first
       setTempEnabled(area.tempAlertEnabled ?? false);
       setTempThreshold(area.tempThreshold ?? 35);
       setRainEnabled(area.rainAlertEnabled ?? false);
       setRainThreshold(area.rainThreshold ?? 50);
-    }
+
+      try {
+        const resp = await apiClient.get(`/admin/areas/${area.areaId}/thresholds`);
+        if (cancelled) return;
+        const data = resp.data;
+        if (data) {
+          // If server explicitly returns a threshold (non-null), prefer it and enable that alert.
+          if (data.temp_threshold !== null && data.temp_threshold !== undefined) {
+            setTempThreshold(data.temp_threshold);
+            setTempEnabled(true);
+            setRainEnabled(false);
+          } else if (data.rain_threshold !== null && data.rain_threshold !== undefined) {
+            setRainThreshold(data.rain_threshold);
+            setRainEnabled(true);
+            setTempEnabled(false);
+          } else {
+            // Fallback to existing area/local settings
+            setTempEnabled(area.tempAlertEnabled ?? false);
+            setRainEnabled(area.rainAlertEnabled ?? false);
+          }
+        }
+      } catch (err) {
+        console.warn('Không lấy được ngưỡng cảnh báo từ server:', err);
+      }
+    };
+
+    loadThresholds();
+
+    return () => { cancelled = true; };
   }, [area, isOpen]);
 
   if (!isOpen || !area) return null;
 
   const handleSave = () => {
-    if (onSave) {
-      onSave(area.areaId, {
-        tempAlertEnabled: tempEnabled,
-        tempThreshold,
-        rainAlertEnabled: rainEnabled,
-        rainThreshold,
-      });
-    }
-    onClose();
+    const doSave = async () => {
+      try {
+        // Prepare payload: set null for disabled metric per business rule
+        const payload: any = {
+          temp_threshold: tempEnabled ? tempThreshold : null,
+          rain_threshold: rainEnabled ? rainThreshold : null,
+        };
+
+        await apiClient.put(`/admin/areas/${area?.areaId}/thresholds`, payload);
+
+        if (onSave && area) {
+          onSave(area.areaId, {
+            tempAlertEnabled: tempEnabled,
+            tempThreshold: tempEnabled ? tempThreshold : null,
+            rainAlertEnabled: rainEnabled,
+            rainThreshold: rainEnabled ? rainThreshold : null,
+          });
+        }
+        onClose();
+      } catch (err: any) {
+        console.error('Lỗi khi cập nhật ngưỡng cảnh báo:', err);
+        alert('Không thể lưu cài đặt cảnh báo. Vui lòng thử lại.');
+      }
+    };
+
+    doSave();
   };
 
   return (

@@ -26,12 +26,12 @@ export class AreaRowFactory {
         <td className="p-4 text-(--text-sm) font-medium text-(--color-text-secondary)">
           {area.adminUnit}
         </td>
-        <td className="p-4">
+        {/* <td className="p-4">
           <div className="flex items-center gap-2">
             <span className="font-bold text-(--color-text-primary)">{area.hotspotCount}</span>
             <span className={`h-1.5 w-1.5 rounded-full ${getHotspotDotClass(area.hotspotCount)}`} />
           </div>
-        </td>
+        </td> */}
         <td className="p-4 text-right">
           <div className="flex justify-end gap-2">
             <button 

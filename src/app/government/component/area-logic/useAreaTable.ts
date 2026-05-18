@@ -188,10 +188,11 @@ export function useAreaTable() {
 
   const handleSaveAlertSettings = useCallback((areaId: number, settings: {
     tempAlertEnabled: boolean;
-    tempThreshold: number;
+    tempThreshold: number | null;
     rainAlertEnabled: boolean;
-    rainThreshold: number;
+    rainThreshold: number | null;
   }) => {
+    // Persist settings locally
     localStorage.setItem(`@swtis_area_alerts_${areaId}`, JSON.stringify(settings));
     setAreas((prev) =>
       prev.map((item) =>

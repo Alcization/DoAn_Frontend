@@ -104,7 +104,7 @@ export default function AreaTable() {
               <tr className="border-b border-(--color-border) text-(--color-text-muted) text-(--text-xs) uppercase tracking-wider">
                 <th className="p-4 font-bold">{t("areaManagement.table.areaName")}</th>
                 <th className="p-4 font-bold">{t("areaManagement.table.adminUnit")}</th>
-                <th className="p-4 font-bold">{t("areaManagement.table.hotspots")}</th>
+                {/* <th className="p-4 font-bold">{t("areaManagement.table.hotspots")}</th> */}
                 <th className="p-4 font-bold text-right">{t("areaManagement.table.actions")}</th>
               </tr>
             </thead>

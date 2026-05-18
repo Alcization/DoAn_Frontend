@@ -32,9 +32,9 @@ export interface ManagedArea {
   boundary: string;
   status: "active" | "inactive";
   tempAlertEnabled?: boolean;
-  tempThreshold?: number;
+  tempThreshold?: number | null;
   rainAlertEnabled?: boolean;
-  rainThreshold?: number;
+  rainThreshold?: number | null;
 }
 
 export interface AreaMutationPayload {

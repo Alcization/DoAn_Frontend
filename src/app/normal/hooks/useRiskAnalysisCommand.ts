@@ -85,7 +85,7 @@ export const useRiskAnalysisCommand = () => {
       if (isRaining) {
         riskLevel = "high";
         recommendations.push(`Cảnh báo: Có ${targetForecast.weather[0].description} vào lúc ${riskData.time}.`);
-        recommendations.push("Đường đi trơn trượt và tầm nhìn bị hạn chế. KHÔNG NÊN xuất phát lúc này.");
+        recommendations.push("Đường đi trơn trượt và tầm nhìn bị hạn chế. Không nên xuất phát lúc này.");
         const nextClearForecast = forecastList.slice(closestIndex + 1).find(
           (f: any) => f.weather[0].id >= 800
         );
@@ -94,9 +94,6 @@ export const useRiskAnalysisCommand = () => {
           const clearDate = new Date(nextClearForecast.dt * 1000);
           const isTomorrow = clearDate.getDate() !== now.getDate();
           suggestedDepartureTime = `${clearDate.getHours().toString().padStart(2, '0')}:${clearDate.getMinutes().toString().padStart(2, '0')} ${isTomorrow ? '(Ngày mai)' : ''}`;
-          recommendations.push(`💡 Lời khuyên: Bạn nên chờ đến khoảng ${suggestedDepartureTime} thời tiết sẽ tốt hơn (${nextClearForecast.weather[0].description}).`);
-        } else {
-          recommendations.push("💡 Lời khuyên: Thời tiết xấu kéo dài trong nhiều giờ tới. Cân nhắc dời lịch trình.");
         }
       } else {
         riskLevel = "low";
