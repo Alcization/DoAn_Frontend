@@ -9,11 +9,9 @@ import { decodePolyline } from "@/util/polyline";
 import { API_BASE_URL } from "@/services/api-config";
 
 // Design Pattern Infrastructure
-import { 
-  VisualizationProcessor, 
-  TrafficStrategy, 
-  WeatherStrategy, 
-  VisualizationStrategy 
+import {
+  VisualizationProcessor,
+  TrafficStrategy
 } from "../hooks/VisualizationStrategy";
 
 // Dynamic import for VietMap
@@ -91,12 +89,9 @@ export default function MapVisualization() {
   
   const lastSavedRouteRef = useRef<string>("");
 
-  const [vizMode, setVizMode] = useState<'traffic' | 'weather'>('traffic');
-  const strategy: VisualizationStrategy = useMemo(() => 
-    vizMode === 'traffic' 
-      ? new TrafficStrategy() 
-      : new WeatherStrategy(weatherBySegment) 
-  , [vizMode, weatherBySegment]);
+  const [showTraffic, setShowTraffic] = useState(true);
+  const [showWeather, setShowWeather] = useState(false);
+  const strategy = useMemo(() => new TrafficStrategy(weatherBySegment), [weatherBySegment]);
   
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -311,22 +306,22 @@ export default function MapVisualization() {
         {useStatic ? (
           <StaticMapPreview apiKey={apiKey} center={locationDetails.to} />
         ) : (
-          <VietMap routeData={routeData} vizMode={vizMode} />
+          <VietMap routeData={routeData} hideViz={!showTraffic} showWeather={showWeather} />
         )}
 
-        {/* Floating Viz Toggles (Strategy Switcher) */}
+        {/* Floating Viz Toggles (independent) */}
         {!useStatic && (
           <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
             {[
-              { id: 'traffic', Icon: Activity, title: 'Traffic Status' },
-              { id: 'weather', Icon: Cloud, title: 'Weather Status' }
-            ].map(({ id, Icon, title }) => (
-              <button 
+              { id: 'traffic', Icon: Activity, title: 'Traffic Status', active: showTraffic, onToggle: () => setShowTraffic(v => !v) },
+              { id: 'weather', Icon: Cloud, title: 'Weather Status', active: showWeather, onToggle: () => setShowWeather(v => !v) }
+            ].map(({ id, Icon, title, active, onToggle }) => (
+              <button
                 key={id}
-                onClick={() => setVizMode(id as any)}
+                onClick={onToggle}
                 className={`p-2.5 rounded-xl shadow-lg border transition-all active:scale-95 ${
-                  vizMode === id 
-                    ? 'bg-(--color-primary) text-white border-transparent' 
+                  active
+                    ? 'bg-(--color-primary) text-white border-transparent'
                     : 'bg-(--color-surface) text-(--color-text-secondary) border-(--color-border) hover:text-(--color-primary)'
                 }`}
                 title={title}
@@ -366,11 +361,9 @@ export default function MapVisualization() {
         </div>
 
         {/* Advisory Section with Dynamic Weather Analysis */}
-        
-        
-        {/* <div className={`mb-6 p-4 rounded-[16px] flex items-center justify-between shadow-sm border ${
-          advisory.hasAlert 
-            ? 'bg-(--color-warning-bg) border-(--color-warning)/20' 
+        <div className={`mb-6 p-4 rounded-[16px] flex items-center justify-between shadow-sm border ${
+          advisory.hasAlert
+            ? 'bg-(--color-warning-bg) border-(--color-warning)/20'
             : 'bg-(--color-primary-bg) border-(--color-primary)/20'
         }`}>
           <div className="flex items-center gap-2">
@@ -389,7 +382,7 @@ export default function MapVisualization() {
           <span className={`text-(--text-sm) font-bold ${advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'}`}>
             {t("map.visualization.startAfter", { minutes: advisory.delayMinutes })}
           </span>
-        </div> */}
+        </div>
 
         {/* Dynamic Weather/Route-Based Alerts */}
         {advisory.hasAlert && advisory.alertMessage && (
@@ -427,13 +420,12 @@ function RouteStatsFacade({ routeInfo, t }: { routeInfo: any, t: any }) {
             : `${Math.round(routeInfo.distance)} m`)
         : "-- km",
       color: "text-(--color-text-primary)"
+    },
+    {
+      label: t("map.visualization.status"),
+      value: routeInfo ? t("map.visualization.safe") : t("map.visualization.clear"),
+      color: routeInfo ? "text-(--color-success)" : "text-(--color-text-muted)"
     }
-    // },
-    // {
-    //   label: t("map.visualization.status"),
-    //   value: routeInfo ? t("map.visualization.safe") : t("map.visualization.clear"),
-    //   color: routeInfo ? "text-(--color-success)" : "text-(--color-text-muted)"
-    // }
   ], [routeInfo, t]);
 
   return (

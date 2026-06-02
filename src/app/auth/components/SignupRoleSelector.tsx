@@ -16,7 +16,7 @@ export default function SignupRoleSelector({ value, onChange }: SignupRoleSelect
       value={value}
       onChange={onChange}
       options={[
-        { value: "personal", label: t("auth.roles.personal", { defaultValue: "Cá nhân" }), icon: <User size={20} /> },
+        { value: "individual", label: t("auth.roles.personal", { defaultValue: "Cá nhân" }), icon: <User size={20} /> },
         { value: "business", label: t("auth.roles.business", { defaultValue: "Doanh nghiệp" }), icon: <Briefcase size={20} /> },
         { value: "government", label: t("auth.roles.government", { defaultValue: "Cơ quan quản lí" }), icon: <Building2 size={20} /> },
       ]}

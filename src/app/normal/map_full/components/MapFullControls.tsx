@@ -7,17 +7,22 @@ import { Target, Focus, Cloud, Activity } from 'lucide-react';
 interface MapFullControlsProps {
   onGoToCurrent?: () => void;
   onZoomToBounds?: () => void;
-  vizMode?: 'traffic' | 'weather';
-  setVizMode?: (mode: 'traffic' | 'weather') => void;
+  showTraffic?: boolean;
+  setShowTraffic?: (v: boolean) => void;
+  showWeather?: boolean;
+  setShowWeather?: (v: boolean) => void;
 }
 
-export default function MapFullControls({ 
-  onGoToCurrent, 
+export default function MapFullControls({
+  onGoToCurrent,
   onZoomToBounds,
-  vizMode,
-  setVizMode 
+  showTraffic,
+  setShowTraffic,
+  showWeather,
+  setShowWeather,
 }: MapFullControlsProps) {
   const { t } = useTranslation();
+  const hasToggles = !!(setShowTraffic || setShowWeather);
 
   return (
     <div className="absolute top-6 left-6 z-10 flex flex-col gap-3">
@@ -25,7 +30,7 @@ export default function MapFullControls({
       {(onGoToCurrent || onZoomToBounds) && (
         <div className="flex flex-col gap-2">
           {onGoToCurrent && (
-            <button 
+            <button
               onClick={onGoToCurrent}
               className="p-3 bg-(--color-surface) rounded-2xl shadow-(--shadow-md) border border-(--color-border) text-(--color-text-secondary) hover:text-(--color-primary) transition-colors active:scale-95"
               title={t('mapFull.actions.currentLocation')}
@@ -34,7 +39,7 @@ export default function MapFullControls({
             </button>
           )}
           {onZoomToBounds && (
-            <button 
+            <button
               onClick={onZoomToBounds}
               className="p-3 bg-(--color-surface) rounded-2xl shadow-(--shadow-md) border border-(--color-border) text-(--color-text-secondary) hover:text-(--color-primary) transition-colors active:scale-95"
               title={t('mapFull.actions.focusRoute')}
@@ -45,33 +50,37 @@ export default function MapFullControls({
         </div>
       )}
 
-      {((onGoToCurrent || onZoomToBounds) && setVizMode) && <div className="w-full h-px bg-(--color-border) my-1" />}
+      {((onGoToCurrent || onZoomToBounds) && hasToggles) && <div className="w-full h-px bg-(--color-border) my-1" />}
 
-      {/* Logic Toggles */}
-      {setVizMode && (
+      {/* Independent Layer Toggles */}
+      {hasToggles && (
         <div className="flex flex-col gap-2">
-          <button 
-            onClick={() => setVizMode?.('traffic')}
-            className={`p-3 rounded-2xl shadow-(--shadow-md) border transition-all active:scale-95 ${
-              vizMode === 'traffic' 
-                ? 'bg-(--color-primary) text-white border-transparent' 
-                : 'bg-(--color-surface) text-(--color-text-secondary) border-(--color-border) hover:text-(--color-primary)'
-            }`}
-            title="Traffic Status"
-          >
-            <Activity size={22} />
-          </button>
-          <button 
-            onClick={() => setVizMode?.('weather')}
-            className={`p-3 rounded-2xl shadow-(--shadow-md) border transition-all active:scale-95 ${
-              vizMode === 'weather' 
-                ? 'bg-(--color-primary) text-white border-transparent' 
-                : 'bg-(--color-surface) text-(--color-text-secondary) border-(--color-border) hover:text-(--color-primary)'
-            }`}
-            title="Weather Status"
-          >
-            <Cloud size={22} />
-          </button>
+          {setShowTraffic && (
+            <button
+              onClick={() => setShowTraffic(!showTraffic)}
+              className={`p-3 rounded-2xl shadow-(--shadow-md) border transition-all active:scale-95 ${
+                showTraffic
+                  ? 'bg-(--color-primary) text-white border-transparent'
+                  : 'bg-(--color-surface) text-(--color-text-secondary) border-(--color-border) hover:text-(--color-primary)'
+              }`}
+              title="Traffic Status"
+            >
+              <Activity size={22} />
+            </button>
+          )}
+          {setShowWeather && (
+            <button
+              onClick={() => setShowWeather(!showWeather)}
+              className={`p-3 rounded-2xl shadow-(--shadow-md) border transition-all active:scale-95 ${
+                showWeather
+                  ? 'bg-(--color-primary) text-white border-transparent'
+                  : 'bg-(--color-surface) text-(--color-text-secondary) border-(--color-border) hover:text-(--color-primary)'
+              }`}
+              title="Weather Status"
+            >
+              <Cloud size={22} />
+            </button>
+          )}
         </div>
       )}
     </div>

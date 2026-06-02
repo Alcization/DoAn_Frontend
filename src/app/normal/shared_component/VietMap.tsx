@@ -16,7 +16,7 @@ interface VietMapProps {
   center?: [number, number]; // [lng, lat]
   zoom?: number;
   routeData?: any;
-  vizMode?: 'traffic' | 'weather';
+  showWeather?: boolean;
   onClick?: (lngLat: { lat: number; lng: number }) => void;
   selectedLocation?: { lat: number; lng: number } | null;
   originCoords?: { lat: number; lng: number } | null;
@@ -37,7 +37,7 @@ export default function VietMap({
   center = HCM_CENTER,
   zoom = DEFAULT_MAP_ZOOM,
   routeData: propRouteData,
-  vizMode = 'traffic',
+  showWeather = false,
   onClick,
   selectedLocation: propSelectedLocation,
   originCoords: propOriginCoords,
@@ -74,7 +74,7 @@ export default function VietMap({
   } | null>(null);
 
   // --- Refs (Synced with state/props) ---
-  const vizModeRef = useRef(vizMode);
+  const showWeatherRef = useRef(showWeather);
   const tRef = useRef(t);
   const themeRef = useRef(theme);
   const routeInfoRef = useRef<any>(null);
@@ -82,7 +82,7 @@ export default function VietMap({
   const onClickRef = useRef(onClick);
   const hideVizRef = useRef(hideViz);
 
-  useEffect(() => { vizModeRef.current = vizMode; }, [vizMode]);
+  useEffect(() => { showWeatherRef.current = showWeather; }, [showWeather]);
   useEffect(() => { tRef.current = t; }, [t]);
   useEffect(() => { themeRef.current = theme; }, [theme]);
   useEffect(() => { routeInfoRef.current = routeInfo; }, [routeInfo]);
@@ -278,46 +278,50 @@ export default function VietMap({
         popupRef.current = popup;
 
         mapInstance.on('mouseenter', 'route-layer', (e: any) => {
-          if (hideVizRef.current) return;
+          const showTraffic = !hideVizRef.current;
+          const showWeatherNow = showWeatherRef.current;
+          if (!showTraffic && !showWeatherNow) return;
+
           mapInstance.getCanvas().style.cursor = 'pointer';
           const feature = e.features?.[0];
           if (!feature) return;
 
           const { status, weather, label } = feature.properties || {};
-          
-          let content = '';
           const currentT = tRef.current;
-          const currentVizMode = vizModeRef.current;
           const currentTheme = themeRef.current;
-          
-          const titleColor = '#6b7280'; // gray-500
+
+          const titleColor = '#6b7280';
           const mainColor = currentTheme === 'dark' ? '#f3f4f6' : '#111827';
+          const bg = currentTheme === 'dark' ? '#1f2937' : '#ffffff';
           const trafficColor = status === 'low' ? '#10b981' : status === 'normal' ? '#f59e0b' : '#ef4444';
 
-          if (currentVizMode === 'traffic') {
+          const blocks: string[] = [];
+          if (showTraffic) {
             const statusKey = status || label || 'normal';
             const statusText = currentT(`map.visualization.${statusKey}`);
-            content = `<div style="padding: 8px; font-family: sans-serif; min-width: 100px; background: ${currentTheme === 'dark' ? '#1f2937' : '#ffffff'}; color: ${mainColor};">
+            blocks.push(`
               <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: ${titleColor}; margin: 0;">${currentT("map.layers.traffic")}</p>
               <p style="font-size: 14px; font-weight: 900; margin: 4px 0 0 0; color: ${trafficColor};">${statusText}</p>
-            </div>`;
-          } else {
-            content = `<div style="padding: 8px; font-family: sans-serif; min-width: 100px; background: ${currentTheme === 'dark' ? '#1f2937' : '#ffffff'}; color: ${mainColor};">
-              <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: ${titleColor}; margin: 0;">${currentT("sidebar.weatherForecast")}</p>
+            `);
+          }
+          if (showWeatherNow) {
+            blocks.push(`
+              <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: ${titleColor}; margin: ${showTraffic ? '8px 0 0 0' : '0'};">${currentT("sidebar.weatherForecast")}</p>
               <p style="font-size: 14px; font-weight: 900; margin: 4px 0 0 0; color: #2563eb; text-transform: capitalize;">${currentT(`map.visualization.${weather || 'sunny'}`)}</p>
-            </div>`;
+            `);
           }
 
+          const content = `<div style="padding: 8px; font-family: sans-serif; min-width: 100px; background: ${bg}; color: ${mainColor};">${blocks.join('')}</div>`;
           popup.setLngLat(e.lngLat).setHTML(content).addTo(mapInstance);
         });
 
         mapInstance.on('mousemove', 'route-layer', (e: any) => {
-          if (hideVizRef.current) return;
+          if (hideVizRef.current && !showWeatherRef.current) return;
           popup.setLngLat(e.lngLat);
         });
 
         mapInstance.on('mouseleave', 'route-layer', () => {
-          if (hideVizRef.current) return;
+          if (hideVizRef.current && !showWeatherRef.current) return;
           mapInstance.getCanvas().style.cursor = '';
           popup.remove();
         });
@@ -408,7 +412,7 @@ export default function VietMap({
     weatherMarkersRef.current.forEach(m => m.remove());
     weatherMarkersRef.current = [];
 
-    if (vizMode !== 'weather' || hideViz) return;
+    if (!showWeather) return;
 
     const activeRoute = propRouteData || (routeInfo?.points ? {
       type: 'FeatureCollection',
@@ -481,7 +485,7 @@ export default function VietMap({
         }
       });
     }
-  }, [propRouteData, routeInfo, vizMode, map, hideViz]);
+  }, [propRouteData, routeInfo, showWeather, map]);
 
   // Marker Management
   useEffect(() => {
