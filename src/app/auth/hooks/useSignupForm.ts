@@ -19,7 +19,7 @@ export function useSignupForm() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "personal",
+    role: "individual",
   });
   
   const [showPassword, setShowPassword] = useState(false);

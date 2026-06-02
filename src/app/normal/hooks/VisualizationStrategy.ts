@@ -26,13 +26,22 @@ export class TrafficStrategy implements VisualizationStrategy {
   private statuses = ['low', 'normal', 'heavy', 'low'];
   private colors = ['green', 'yellow', 'red', 'green'];
   private labels = ['safe', 'warning', 'danger', 'safe'];
-  private weathers = ['sunny', 'cloudy', 'rainy', 'clear'];
+  private fallbackWeathers = ['sunny', 'cloudy', 'rainy', 'clear'];
+  private weatherData: WeatherDataPoint[];
+
+  constructor(weatherData: WeatherDataPoint[] = []) {
+    this.weatherData = weatherData;
+  }
 
   getSegmentStatus(idx: number) { return this.statuses[idx % 4]; }
   getSegmentColor(idx: number) { return this.colors[idx % 4]; }
   getSegmentLabel(idx: number) { return `map.visualization.${this.labels[idx % 4]}`; }
-  getSegmentWeather(idx: number) { return this.weathers[idx % 4]; }
-  getSegmentTemperature(idx: number) { return null; } // Traffic mặc định không hiển thị nhiệt độ
+  getSegmentWeather(idx: number) {
+    return this.weatherData[idx]?.weather || this.fallbackWeathers[idx % 4];
+  }
+  getSegmentTemperature(idx: number) {
+    return this.weatherData[idx]?.temperatureC ?? null;
+  }
 }
 
 /**

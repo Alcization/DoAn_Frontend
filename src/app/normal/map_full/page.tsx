@@ -83,7 +83,8 @@ export default function MapFullPage() {
   const [activeTab, setActiveTab] = useState<'search' | 'history'>('search');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [dynamicRoute, setDynamicRoute] = useState<any>(null);
-  const [vizMode, setVizMode] = useState<'traffic' | 'weather'>('traffic');
+  const [showTraffic, setShowTraffic] = useState(true);
+  const [showWeather, setShowWeather] = useState(false);
   
   // Real-time route data from the fetcher
   const routeData = useMemo(() => {
@@ -172,15 +173,17 @@ export default function MapFullPage() {
         {/* Main Map Section */}
       <main className="flex-1 relative bg-(--color-bg-secondary)">
         <div className="absolute inset-0 z-0">
-           <DynamicVietMap routeData={routeData} vizMode={vizMode} />
+           <DynamicVietMap routeData={routeData} hideViz={!showTraffic} showWeather={showWeather} />
         </div>
 
         {/* Floating Controls Overlay Component */}
         <MapFullControls 
           onGoToCurrent={handleGoToCurrent}
           onZoomToBounds={handleZoomToBounds}
-          vizMode={vizMode}
-          setVizMode={setVizMode}
+          showTraffic={showTraffic}
+          setShowTraffic={setShowTraffic}
+          showWeather={showWeather}
+          setShowWeather={setShowWeather}
         />
 
         {/* Bottom Route Summary Overlay Component */}
