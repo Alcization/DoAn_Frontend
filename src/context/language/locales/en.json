@@ -740,7 +740,9 @@
       "flood": "Flood",
       "landslide": "Landslide",
       "none": "None",
-      "recommendations": "Recommendations:"
+      "recommendations": "Recommendations:",
+      "today": "Today",
+      "tomorrow": "Tomorrow"
     }
   },
   "map": {

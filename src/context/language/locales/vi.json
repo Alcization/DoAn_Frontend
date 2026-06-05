@@ -769,7 +769,9 @@
       "flood": "Ngập",
       "landslide": "Sạt lở",
       "none": "Không",
-      "recommendations": "Khuyến nghị:"
+      "recommendations": "Khuyến nghị:",
+      "today": "Hôm nay",
+      "tomorrow": "Ngày mai"
     }
   },
   "map": {
