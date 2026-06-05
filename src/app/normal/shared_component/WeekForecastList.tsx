@@ -16,7 +16,7 @@ export default function WeekForecastList({ selectedLocation }: CurrentWeatherDet
   const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
   const LAT = 10.7626; 
   const LON = 106.6602;
-  const CNT = 7; 
+  const CNT = 7;
 
   // Hàm helper định dạng Tiếng Việt chuẩn xác
   const formatDayVietnamese = (date: Date, index: number) => {

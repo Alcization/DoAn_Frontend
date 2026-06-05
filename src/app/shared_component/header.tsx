@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { usePathname } from "next/navigation";
 import { useTheme } from "../../context/theme/ThemeContext";
 import { useSidebar } from "../../context/sidebar/SidebarContext";
+import NotificationBell from "./NotificationBell";
 
 const menuIcon = "/asssets/icon/menu.png";  
 const logoImg = "/asssets/logo/Logo.png";
@@ -156,6 +157,9 @@ export default function Header() {
             />
             </button>
         </div>
+
+        {/* Notifications - Hidden on auth pages */}
+        {!isAuthPage && <NotificationBell />}
 
         {/* User Account Dropdown - Hidden on auth pages */}
         {!isAuthPage && (
