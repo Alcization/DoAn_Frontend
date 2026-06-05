@@ -11,13 +11,17 @@ import { API_BASE_URL } from "@/services/api-config";
 // Design Pattern Infrastructure
 import {
   VisualizationProcessor,
-  TrafficStrategy
+  TrafficStrategy,
 } from "../hooks/VisualizationStrategy";
 
 // Dynamic import for VietMap
 const VietMap = dynamic(() => import("./VietMap"), {
   ssr: false,
-  loading: () => <div className="h-full w-full flex items-center justify-center bg-(--color-bg-secondary) text-(--color-text-secondary)">Loading Map...</div>
+  loading: () => (
+    <div className="h-full w-full flex items-center justify-center bg-(--color-bg-secondary) text-(--color-text-secondary)">
+      Loading Map...
+    </div>
+  ),
 });
 
 // --- API FETCHING LOGIC ---
@@ -29,11 +33,28 @@ export interface SegmentWeatherData {
   temperatureC: number | null;
 }
 
-const normalizeWeather = (condition?: string, isDayTime: boolean = true): WeatherLabel => {
+const normalizeWeather = (
+  condition?: string,
+  isDayTime: boolean = true,
+): WeatherLabel => {
   const normalized = (condition || "").toLowerCase();
 
-  if (["rain", "drizzle", "thunderstorm", "squall"].includes(normalized)) return "rainy";
-  if (["clouds", "mist", "fog", "haze", "smoke", "dust", "sand", "ash", "tornado"].includes(normalized)) return "cloudy";
+  if (["rain", "drizzle", "thunderstorm", "squall"].includes(normalized))
+    return "rainy";
+  if (
+    [
+      "clouds",
+      "mist",
+      "fog",
+      "haze",
+      "smoke",
+      "dust",
+      "sand",
+      "ash",
+      "tornado",
+    ].includes(normalized)
+  )
+    return "cloudy";
   if (normalized === "clear") return isDayTime ? "sunny" : "clear";
   return isDayTime ? "sunny" : "clear";
 };
@@ -41,11 +62,16 @@ const normalizeWeather = (condition?: string, isDayTime: boolean = true): Weathe
 // Hàm dịch thời tiết sang tiếng Việt để lưu Database
 const translateWeatherToVietnamese = (weather: string): string => {
   switch (weather) {
-    case "sunny": return "Nắng";
-    case "cloudy": return "Nhiều Mây";
-    case "rainy": return "Mưa";
-    case "clear": return "Quang đãng";
-    default: return "Bình thường";
+    case "sunny":
+      return "Nắng";
+    case "cloudy":
+      return "Nhiều Mây";
+    case "rainy":
+      return "Mưa";
+    case "clear":
+      return "Quang đãng";
+    default:
+      return "Bình thường";
   }
 };
 
@@ -54,11 +80,15 @@ const fetchWeatherData = async (lat: number, lon: number, apiKey?: string) => {
 
   try {
     const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`,
     );
 
     if (!response.ok) {
-      console.warn("OpenWeather request failed:", response.status, response.statusText);
+      console.warn(
+        "OpenWeather request failed:",
+        response.status,
+        response.statusText,
+      );
       return null;
     }
 
@@ -83,16 +113,21 @@ export default function MapVisualization() {
     time: number;
     points?: string;
   } | null>(null);
-  
-  const [weatherBySegment, setWeatherBySegment] = useState<SegmentWeatherData[]>([]);
+
+  const [weatherBySegment, setWeatherBySegment] = useState<
+    SegmentWeatherData[]
+  >([]);
   const openWeatherApiKey = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
-  
+
   const lastSavedRouteRef = useRef<string>("");
 
   const [showTraffic, setShowTraffic] = useState(true);
   const [showWeather, setShowWeather] = useState(false);
-  const strategy = useMemo(() => new TrafficStrategy(weatherBySegment), [weatherBySegment]);
-  
+  const strategy = useMemo(
+    () => new TrafficStrategy(weatherBySegment),
+    [weatherBySegment],
+  );
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,24 +151,35 @@ export default function MapVisualization() {
 
       for (let i = 0; i < segmentCount; i++) {
         const start = i * partLen;
-        const end = i === segmentCount - 1 ? fullCoords.length : Math.min(fullCoords.length, (i + 1) * partLen + 1);
+        const end =
+          i === segmentCount - 1
+            ? fullCoords.length
+            : Math.min(fullCoords.length, (i + 1) * partLen + 1);
         const segmentCoords = fullCoords.slice(start, end);
 
         if (segmentCoords.length > 0) {
-          sampleCoords.push(segmentCoords[Math.floor(segmentCoords.length / 2)]);
+          sampleCoords.push(
+            segmentCoords[Math.floor(segmentCoords.length / 2)],
+          );
         }
       }
 
       if (!openWeatherApiKey) {
         if (!isCancelled) {
-          setWeatherBySegment(sampleCoords.map(() => ({ weather: "sunny", temperatureC: null })));
+          setWeatherBySegment(
+            sampleCoords.map(() => ({ weather: "sunny", temperatureC: null })),
+          );
         }
         return;
       }
 
       const weatherResponses = await Promise.all(
         sampleCoords.map(async ([lng, lat]) => {
-          const weatherData = await fetchWeatherData(lat, lng, openWeatherApiKey);
+          const weatherData = await fetchWeatherData(
+            lat,
+            lng,
+            openWeatherApiKey,
+          );
           const weatherMain = weatherData?.weather?.[0]?.main;
           const icon = weatherData?.weather?.[0]?.icon as string | undefined;
           const temperatureK = weatherData?.main?.temp as number | undefined;
@@ -141,9 +187,12 @@ export default function MapVisualization() {
 
           return {
             weather: normalizeWeather(weatherMain, isDayTime),
-            temperatureC: typeof temperatureK === "number" ? Number((temperatureK - 273.15).toFixed(1)) : null
+            temperatureC:
+              typeof temperatureK === "number"
+                ? Number((temperatureK - 273.15).toFixed(1))
+                : null,
           };
-        })
+        }),
       );
 
       if (!isCancelled) {
@@ -164,34 +213,41 @@ export default function MapVisualization() {
         return;
       }
 
-      const originName = locationDetails.from.name || locationDetails.from.address;
-      const destinationName = locationDetails.to.name || locationDetails.to.address;
+      const originName =
+        locationDetails.from.name || locationDetails.from.address;
+      const destinationName =
+        locationDetails.to.name || locationDetails.to.address;
       const routeKey = `${originName}-${destinationName}`;
 
       if (lastSavedRouteRef.current === routeKey) {
-        console.log("=> [Dừng]: Tuyến đường này đã được lưu vào lịch sử rồi (chống spam).");
+        console.log(
+          "=> [Dừng]: Tuyến đường này đã được lưu vào lịch sử rồi (chống spam).",
+        );
         return;
       }
       const token = localStorage.getItem("accessToken");
 
       const midPointIndex = Math.floor(weatherBySegment.length / 2);
-      const representativeWeather = weatherBySegment[midPointIndex]?.weather || "sunny";
-      const weatherStatusVN = translateWeatherToVietnamese(representativeWeather);
+      const representativeWeather =
+        weatherBySegment[midPointIndex]?.weather || "sunny";
+      const weatherStatusVN = translateWeatherToVietnamese(
+        representativeWeather,
+      );
 
       const payload = {
         origin: originName,
         destination: destinationName,
-        weather_status: weatherStatusVN
+        weather_status: weatherStatusVN,
       };
 
       try {
         const response = await fetch(`${API_BASE_URL}/routes/history`, {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
         });
 
         const result = await response.json().catch(() => null);
@@ -199,16 +255,22 @@ export default function MapVisualization() {
         if (response.ok) {
           lastSavedRouteRef.current = routeKey;
         } else {
-          console.error("=> LƯU THẤT BẠI. Server trả về lỗi:", response.status, result);
+          console.error(
+            "=> LƯU THẤT BẠI. Server trả về lỗi:",
+            response.status,
+            result,
+          );
         }
       } catch (error) {
-        console.error("=> LỖI FETCH API (Có thể do sai cổng kết nối, sập server hoặc CORS):", error);
+        console.error(
+          "=> LỖI FETCH API (Có thể do sai cổng kết nối, sập server hoặc CORS):",
+          error,
+        );
       }
     };
 
     saveRouteHistory();
   }, [locationDetails, weatherBySegment]);
-
 
   const visualization = useMemo(() => {
     if (!routeInfo?.points) return null;
@@ -216,50 +278,85 @@ export default function MapVisualization() {
     return VisualizationProcessor.processRoute(fullCoords, strategy);
   }, [routeInfo?.points, strategy]);
 
-  const routeData = useMemo(() => visualization?.geoJson || null, [visualization]);
+  const routeData = useMemo(
+    () => visualization?.geoJson || null,
+    [visualization],
+  );
 
-  // Generate smart advisory based on actual weather and route data
+  // Generate smart advisory based on actual weather and route data.
   const advisory = useMemo(() => {
     if (!weatherBySegment.length || !routeInfo) {
       return {
-        delayMinutes: 15,
+        delayMinutes: 0,
         alertMessage: "",
         hasAlert: false,
-        weatherWarning: ""
+        weatherWarning: "",
       };
     }
 
-    const rainySegments = weatherBySegment.filter(w => w.weather === 'rainy').length;
-    const cloudySegments = weatherBySegment.filter(w => w.weather === 'cloudy').length;
-    const sunnyOrClearSegments = weatherBySegment.filter(w => w.weather === 'sunny' || w.weather === 'clear').length;
+    const total = weatherBySegment.length;
+    const rainyCount = weatherBySegment.filter(
+      (w) => w.weather === "rainy",
+    ).length;
+    const cloudyCount = weatherBySegment.filter(
+      (w) => w.weather === "cloudy",
+    ).length;
+    const rainRatio = rainyCount / total;
+    const cloudRatio = cloudyCount / total;
+    const rainPercent = Math.round(rainRatio * 100);
+    const cloudPercent = Math.round(cloudRatio * 100);
 
-    let delayMinutes = 15;
+    const temps = weatherBySegment
+      .map((w) => w.temperatureC)
+      .filter((v): v is number => typeof v === "number");
+    const maxTemp = temps.length ? Math.max(...temps) : null;
+
+    const travelMinutes = routeInfo.time ? routeInfo.time / 60000 : 30;
+
+    // Typical convective rain cell clears in ~25-30 min — scale with how much of the route is wet.
+    const rainDelay = rainRatio * 30;
+    const cloudDelay = cloudRatio * 8;
+    let heatDelay = 0;
+    if (maxTemp !== null) {
+      if (maxTemp >= 35) heatDelay = 10;
+      else if (maxTemp >= 32) heatDelay = 5;
+    }
+
+    const raw = rainDelay + cloudDelay + heatDelay;
+    const capped = Math.min(raw, Math.max(travelMinutes, 30), 60);
+    const delayMinutes = Math.max(0, Math.round(capped / 5) * 5);
+
     let alertMessage = "";
-    let hasAlert = false;
     let weatherWarning = "";
+    const hasAlert = delayMinutes > 0;
 
-    if (rainySegments > 0) {
-      delayMinutes = 20;
-      alertMessage = "🌧️ Trời đang mưa, mặt đường có thể trơn trượt. Chưa nên xuất phát ngay lập tức.";
-      hasAlert = true;
-      weatherWarning = "🌧️ Trời đang mưa";
-    } else if (cloudySegments > 0) {
-      delayMinutes = 15;
-      alertMessage = "☁️ Trời nhiều mây, có thể xuất hiện mưa bất chợt. Nên theo dõi thời tiết trước khi đi.";
-      hasAlert = true;
-      weatherWarning = "☁️ Trời nhiều mây";
-    } else if (sunnyOrClearSegments > 0) {
-      delayMinutes = 10;
-      weatherWarning = "☀️ Trời nắng/quang, có thể xuất phát ngay";
+    if (rainyCount > 0) {
+      weatherWarning = `🌧️ Mưa trên ${rainPercent}% tuyến đường`;
+      alertMessage =
+        rainRatio >= 0.5
+          ? "🌧️ Phần lớn tuyến đường đang mưa, mặt đường trơn trượt. Nên chờ thêm trước khi xuất phát."
+          : "🌧️ Có mưa cục bộ trên tuyến đường. Cân nhắc thời điểm xuất phát.";
+    } else if (cloudyCount > 0) {
+      weatherWarning = `☁️ Nhiều mây trên ${cloudPercent}% tuyến đường`;
+      if (cloudRatio >= 0.5) {
+        alertMessage =
+          "☁️ Trời nhiều mây trên phần lớn tuyến đường, có thể xuất hiện mưa bất chợt.";
+      }
+    } else if (maxTemp !== null && maxTemp >= 32) {
+      weatherWarning = `🌡️ Nhiệt độ cao (tối đa ${maxTemp.toFixed(0)}°C)`;
+      if (maxTemp >= 35) {
+        alertMessage =
+          "🌡️ Nhiệt độ cao, hãy chuẩn bị nước và che chắn trước khi đi.";
+      }
     } else {
-      weatherWarning = "✓ Thời tiết quang đãng";
+      weatherWarning = "☀️ Thời tiết thuận lợi, có thể xuất phát ngay";
     }
 
     return {
       delayMinutes,
       alertMessage,
       hasAlert,
-      weatherWarning
+      weatherWarning,
     };
   }, [weatherBySegment, routeInfo]);
 
@@ -268,61 +365,91 @@ export default function MapVisualization() {
       const data = event.detail;
       if (data?.paths?.[0]) {
         const path = data.paths[0];
-        setRouteInfo({ distance: path.distance, time: path.time, points: path.points });
-        // lastSavedRouteRef.current = ""; 
+        setRouteInfo({
+          distance: path.distance,
+          time: path.time,
+          points: path.points,
+        });
+        // lastSavedRouteRef.current = "";
       }
     };
 
     const handleLocationDetails = (event: any) => {
       const { type, info } = event.detail;
-      setLocationDetails(prev => {
-        if (prev[type as 'from' | 'to']?.name !== info?.name) {
-          lastSavedRouteRef.current = ""; 
+      setLocationDetails((prev) => {
+        if (prev[type as "from" | "to"]?.name !== info?.name) {
+          lastSavedRouteRef.current = "";
         }
         return { ...prev, [type]: info };
       });
     };
 
     window.addEventListener("vietmap_route_found", handleRouteFound);
-    window.addEventListener("vietmap_location_details_found", handleLocationDetails);
-    
+    window.addEventListener(
+      "vietmap_location_details_found",
+      handleLocationDetails,
+    );
+
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => {
       window.removeEventListener("vietmap_route_found", handleRouteFound);
-      window.removeEventListener("vietmap_location_details_found", handleLocationDetails);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      window.removeEventListener(
+        "vietmap_location_details_found",
+        handleLocationDetails,
+      );
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
 
-  const apiKey = process.env.NEXT_PUBLIC_VIETMAP_MAP_API_KEY || process.env.NEXT_PUBLIC_VIETMAP_API_KEY;
+  const apiKey =
+    process.env.NEXT_PUBLIC_VIETMAP_MAP_API_KEY ||
+    process.env.NEXT_PUBLIC_VIETMAP_API_KEY;
 
   return (
     <div className="relative w-full h-full" ref={mapContainerRef}>
-      <div className={`relative w-full z-1 ${isFullscreen ? 'h-screen' : 'h-96 sm:h-[500px] lg:h-[600px]'}`}>
+      <div
+        className={`relative w-full z-1 ${isFullscreen ? "h-screen" : "h-96 sm:h-[500px] lg:h-[600px]"}`}
+      >
         {useStatic ? (
           <StaticMapPreview apiKey={apiKey} center={locationDetails.to} />
         ) : (
-          <VietMap routeData={routeData} hideViz={!showTraffic} showWeather={showWeather} />
+          <VietMap
+            routeData={routeData}
+            hideViz={!showTraffic}
+            showWeather={showWeather}
+          />
         )}
 
         {/* Floating Viz Toggles (independent) */}
         {!useStatic && (
           <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
             {[
-              { id: 'traffic', Icon: Activity, title: 'Traffic Status', active: showTraffic, onToggle: () => setShowTraffic(v => !v) },
-              { id: 'weather', Icon: Cloud, title: 'Weather Status', active: showWeather, onToggle: () => setShowWeather(v => !v) }
+              {
+                id: "traffic",
+                Icon: Activity,
+                title: "Traffic Status",
+                active: showTraffic,
+                onToggle: () => setShowTraffic((v) => !v),
+              },
+              {
+                id: "weather",
+                Icon: Cloud,
+                title: "Weather Status",
+                active: showWeather,
+                onToggle: () => setShowWeather((v) => !v),
+              },
             ].map(({ id, Icon, title, active, onToggle }) => (
               <button
                 key={id}
                 onClick={onToggle}
                 className={`p-2.5 rounded-xl shadow-lg border transition-all active:scale-95 ${
                   active
-                    ? 'bg-(--color-primary) text-white border-transparent'
-                    : 'bg-(--color-surface) text-(--color-text-secondary) border-(--color-border) hover:text-(--color-primary)'
+                    ? "bg-(--color-primary) text-white border-transparent"
+                    : "bg-(--color-surface) text-(--color-text-secondary) border-(--color-border) hover:text-(--color-primary)"
                 }`}
                 title={title}
               >
@@ -336,7 +463,7 @@ export default function MapVisualization() {
       <div className="mt-4 bg-(--color-surface) rounded-[20px] p-6 shadow-lg border border-(--color-border)">
         {/* Route Stats Facade */}
         <RouteStatsFacade routeInfo={routeInfo} t={t} />
-        
+
         {/* Location Details Facade */}
         <LocationDetailsFacade details={locationDetails} />
 
@@ -356,43 +483,63 @@ export default function MapVisualization() {
           </div>
           <div className="flex justify-between text-(--text-xs) font-medium text-(--color-text-secondary) mt-2">
             <span>0km</span>
-            <span>{routeInfo ? (routeInfo.distance / 1000).toFixed(1) : "--"}km</span>
+            <span>
+              {routeInfo ? (routeInfo.distance / 1000).toFixed(1) : "--"}km
+            </span>
           </div>
         </div>
 
         {/* Advisory Section with Dynamic Weather Analysis */}
-        <div className={`mb-6 p-4 rounded-[16px] flex items-center justify-between shadow-sm border ${
-          advisory.hasAlert
-            ? 'bg-(--color-warning-bg) border-(--color-warning)/20'
-            : 'bg-(--color-primary-bg) border-(--color-primary)/20'
-        }`}>
-          <div className="flex items-center gap-2">
-            <Activity size={18} className={advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'} />
-            <div>
-              <span className={`text-(--text-sm) font-bold ${advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'}`}>
-                {t("map.visualization.advision")}:
-              </span>
-              {advisory.weatherWarning && (
-                <p className="text-(--text-xs) font-medium mt-1 m-0 opacity-80">
-                  {advisory.weatherWarning}
-                </p>
-              )}
+        <div
+          className={`mb-6 p-4 rounded-[16px] shadow-sm border ${
+            advisory.hasAlert
+              ? "bg-(--color-warning-bg) border-(--color-warning)/20"
+              : "bg-(--color-primary-bg) border-(--color-primary)/20"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <Activity
+                size={18}
+                className={
+                  advisory.hasAlert
+                    ? "text-(--color-warning)"
+                    : "text-(--color-primary)"
+                }
+              />
+              <div className="min-w-0">
+                <span
+                  className={`text-(--text-sm) font-bold ${advisory.hasAlert ? "text-(--color-warning)" : "text-(--color-primary)"}`}
+                >
+                  {t("map.visualization.advision")}:
+                </span>
+                {advisory.weatherWarning && (
+                  <p className="text-(--text-xs) font-medium mt-1 m-0 opacity-80">
+                    {advisory.weatherWarning}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-          <span className={`text-(--text-sm) font-bold ${advisory.hasAlert ? 'text-(--color-warning)' : 'text-(--color-primary)'}`}>
-            {t("map.visualization.startAfter", { minutes: advisory.delayMinutes })}
-          </span>
-        </div>
-
-        {/* Dynamic Weather/Route-Based Alerts */}
-        {advisory.hasAlert && advisory.alertMessage && (
-          <div className="p-4 rounded-[16px] bg-(--color-warning-bg) border border-(--color-warning)/20 text-(--color-warning) flex gap-3 items-center mb-4">
-            <AlertTriangle size={20} className="shrink-0" />
-            <span className="text-(--text-sm) font-medium">
-              {advisory.alertMessage}
+            <span
+              className={`text-(--text-sm) font-bold shrink-0 ${advisory.hasAlert ? "text-(--color-warning)" : "text-(--color-primary)"}`}
+            >
+              {advisory.delayMinutes > 0
+                ? t("map.visualization.startAfter", {
+                    minutes: advisory.delayMinutes,
+                  })
+                : t("map.visualization.departNow")}
             </span>
           </div>
-        )}
+
+          {advisory.hasAlert && advisory.alertMessage && (
+            <div className="mt-3 pt-3 border-t border-(--color-warning)/20 flex gap-2 items-start text-(--color-text-primary)">
+              <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+              <span className="text-(--text-xs) font-medium">
+                {advisory.alertMessage}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -401,32 +548,39 @@ export default function MapVisualization() {
 /**
  * Facade for Route Statistics
  */
-function RouteStatsFacade({ routeInfo, t }: { routeInfo: any, t: any }) {
-  const stats = useMemo(() => [
-    {
-      label: t("map.visualization.time"),
-      value: routeInfo 
-        ? (routeInfo.time / 60000 > 60
+function RouteStatsFacade({ routeInfo, t }: { routeInfo: any; t: any }) {
+  const stats = useMemo(
+    () => [
+      {
+        label: t("map.visualization.time"),
+        value: routeInfo
+          ? routeInfo.time / 60000 > 60
             ? `${Math.floor(routeInfo.time / 3600000)}h ${Math.floor((routeInfo.time % 3600000) / 60000)}m`
-            : `${Math.round(routeInfo.time / 60000)} ${t("common.minutes") || "min"}`)
-        : "-- min",
-      color: "text-(--color-primary)"
-    },
-    {
-      label: t("map.visualization.distance"),
-      value: routeInfo 
-        ? (routeInfo.distance > 1000 
-            ? `${(routeInfo.distance / 1000).toFixed(1)} km` 
-            : `${Math.round(routeInfo.distance)} m`)
-        : "-- km",
-      color: "text-(--color-text-primary)"
-    },
-    {
-      label: t("map.visualization.status"),
-      value: routeInfo ? t("map.visualization.safe") : t("map.visualization.clear"),
-      color: routeInfo ? "text-(--color-success)" : "text-(--color-text-muted)"
-    }
-  ], [routeInfo, t]);
+            : `${Math.round(routeInfo.time / 60000)} ${t("common.minutes") || "min"}`
+          : "-- min",
+        color: "text-(--color-primary)",
+      },
+      {
+        label: t("map.visualization.distance"),
+        value: routeInfo
+          ? routeInfo.distance > 1000
+            ? `${(routeInfo.distance / 1000).toFixed(1)} km`
+            : `${Math.round(routeInfo.distance)} m`
+          : "-- km",
+        color: "text-(--color-text-primary)",
+      },
+      {
+        label: t("map.visualization.status"),
+        value: routeInfo
+          ? t("map.visualization.safe")
+          : t("map.visualization.clear"),
+        color: routeInfo
+          ? "text-(--color-success)"
+          : "text-(--color-text-muted)",
+      },
+    ],
+    [routeInfo, t],
+  );
 
   return (
     <div className="grid grid-cols-3 gap-6 mb-6">
@@ -453,18 +607,30 @@ function LocationDetailsFacade({ details }: { details: any }) {
   return (
     <div className="mb-6 p-4 bg-(--color-bg) rounded-[16px] border border-(--color-border)">
       <div className="space-y-4">
-        {['from', 'to'].map((type) => {
+        {["from", "to"].map((type) => {
           const loc = details[type];
           if (!loc) return null;
           return (
-            <div key={type} className={`flex gap-3 ${type === 'to' && details.from ? 'border-t border-(--color-border) pt-4' : ''}`}>
-              <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${type === 'from' ? 'bg-(--color-success)' : 'bg-(--color-danger)'}`} />
+            <div
+              key={type}
+              className={`flex gap-3 ${type === "to" && details.from ? "border-t border-(--color-border) pt-4" : ""}`}
+            >
+              <div
+                className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${type === "from" ? "bg-(--color-success)" : "bg-(--color-danger)"}`}
+              />
               <div>
-                <p className="text-(--text-sm) font-bold text-(--color-text-primary) m-0">{loc.name}</p>
-                <p className="text-(--text-xs) text-(--color-text-secondary) m-0">{loc.address}</p>
+                <p className="text-(--text-sm) font-bold text-(--color-text-primary) m-0">
+                  {loc.name}
+                </p>
+                <p className="text-(--text-xs) text-(--color-text-secondary) m-0">
+                  {loc.address}
+                </p>
                 <div className="flex flex-wrap gap-1.5 mt-1.5">
                   {loc.boundaries?.map((b: any) => (
-                    <span key={b.id} className="px-2 py-0.5 bg-(--color-bg-secondary) rounded-md text-[10px] text-(--color-text-secondary) border border-(--color-border)">
+                    <span
+                      key={b.id}
+                      className="px-2 py-0.5 bg-(--color-bg-secondary) rounded-md text-[10px] text-(--color-text-secondary) border border-(--color-border)"
+                    >
                       {b.full_name}
                     </span>
                   ))}
@@ -481,12 +647,18 @@ function LocationDetailsFacade({ details }: { details: any }) {
 /**
  * Proxy/Adapter for Static Map
  */
-function StaticMapPreview({ apiKey, center }: { apiKey?: string, center: any }) {
+function StaticMapPreview({
+  apiKey,
+  center,
+}: {
+  apiKey?: string;
+  center: any;
+}) {
   const coords = center?.lat ? center : { lat: 10.762622, lng: 106.660172 };
   return (
     <div className="w-full h-full flex items-center justify-center bg-(--color-bg-secondary) p-4">
       <div className="relative group max-w-full max-h-full overflow-hidden rounded-xl border border-(--color-border) shadow-2xl">
-        <img 
+        <img
           src={`https://maps.vietmap.vn/api/static/v3/map?apikey=${apiKey}&lat=${coords.lat}&lng=${coords.lng}&zoom=15&width=800&height=500`}
           alt="Static Map Preview"
           className="max-w-full h-auto block"

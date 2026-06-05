@@ -825,7 +825,8 @@
       "rainy": "Mưa",
       "clear": "Trời quang",
       "advision": "Lời khuyên",
-      "startAfter": "Nên bắt đầu sau {{minutes}} phút"
+      "startAfter": "Nên bắt đầu sau {{minutes}} phút",
+      "departNow": "Có thể xuất phát ngay"
     }
   },
   "dashboard": {

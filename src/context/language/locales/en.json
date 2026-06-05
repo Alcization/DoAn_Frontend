@@ -796,7 +796,8 @@
       "rainy": "Rainy",
       "clear": "Clear",
       "advision": "Advision",
-      "startAfter": "Should start after {{minutes}} minutes"
+      "startAfter": "Should start after {{minutes}} minutes",
+      "departNow": "Safe to depart now"
     }
   },
   "dashboard": {
