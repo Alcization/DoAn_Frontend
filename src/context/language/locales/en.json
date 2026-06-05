@@ -76,12 +76,66 @@
       "government": "Government"
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "bellAria": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all read",
+    "alert": {
+      "title": "{{metric}} alert: {{location}}",
+      "body": "{{metric}} is {{value}} ({{operator}} {{threshold}})."
+    },
+    "metrics": {
+      "temp": "Temperature",
+      "feelslike": "Feels like",
+      "precip": "Rainfall",
+      "precipprob": "Rain probability"
+    },
+    "severities": {
+      "info": "Info",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "scopes": {
+      "current": "Now",
+      "forecast_24h": "Next 24h"
+    },
+    "push": {
+      "title": "Browser alerts",
+      "desc": "Receive OS-level alerts even when the tab is closed.",
+      "enable": "Enable browser alerts",
+      "refresh": "Re-register this device",
+      "denied": "Notifications are blocked. Re-enable them in your browser site settings.",
+      "unsupported": "Your browser does not support web push notifications.",
+      "devices": "Subscribed devices",
+      "noDevices": "No devices registered yet."
+    },
+    "rules": {
+      "existing": "Active rules",
+      "empty": "No alert rules for this location yet.",
+      "newTitle": "Add a rule",
+      "metric": "Metric",
+      "operator": "Operator",
+      "threshold": "Threshold",
+      "scope": "Scope",
+      "scopeNow": "Now",
+      "scope24h": "Next 24h",
+      "severity": "Severity",
+      "cooldown": "Cooldown (min)",
+      "showAdvanced": "Advanced",
+      "hideAdvanced": "Hide advanced",
+      "addBtn": "Add rule",
+      "cooldownShort": "cooldown {{m}}m"
+    }
+  },
   "common": {
     "welcome": "Welcome to SWTIS",
     "language": "Language",
     "theme": "Theme",
     "profile": "Profile",
     "cancel": "Cancel",
+    "close": "Close",
+    "refresh": "Refresh",
     "viewAll": "View All",
     "minutes": "minutes",
     "hours": "hours",

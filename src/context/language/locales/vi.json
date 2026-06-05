@@ -98,6 +98,58 @@
       "distance": "Khoảng cách"
     }
   },
+  "notifications": {
+    "title": "Thông báo",
+    "bellAria": "Thông báo",
+    "empty": "Chưa có thông báo nào",
+    "markAllRead": "Đánh dấu đã đọc",
+    "alert": {
+      "title": "Cảnh báo {{metric}}: {{location}}",
+      "body": "{{metric}} hiện tại {{value}} ({{operator}} {{threshold}})."
+    },
+    "metrics": {
+      "temp": "Nhiệt độ",
+      "feelslike": "Nhiệt độ cảm nhận",
+      "precip": "Lượng mưa",
+      "precipprob": "Xác suất mưa"
+    },
+    "severities": {
+      "info": "Thông tin",
+      "warning": "Cảnh báo",
+      "critical": "Nguy hiểm"
+    },
+    "scopes": {
+      "current": "Hiện tại",
+      "forecast_24h": "24 giờ tới"
+    },
+    "push": {
+      "title": "Thông báo trình duyệt",
+      "desc": "Nhận thông báo hệ thống ngay cả khi đã đóng tab.",
+      "enable": "Bật thông báo trình duyệt",
+      "refresh": "Đăng ký lại thiết bị này",
+      "denied": "Thông báo đang bị chặn. Hãy bật lại trong cài đặt trình duyệt.",
+      "unsupported": "Trình duyệt của bạn không hỗ trợ web push.",
+      "devices": "Thiết bị đã đăng ký",
+      "noDevices": "Chưa có thiết bị nào được đăng ký."
+    },
+    "rules": {
+      "existing": "Quy tắc đang bật",
+      "empty": "Chưa có quy tắc cảnh báo cho địa điểm này.",
+      "newTitle": "Thêm quy tắc",
+      "metric": "Chỉ số",
+      "operator": "Toán tử",
+      "threshold": "Ngưỡng",
+      "scope": "Phạm vi",
+      "scopeNow": "Hiện tại",
+      "scope24h": "24 giờ tới",
+      "severity": "Mức độ",
+      "cooldown": "Khoảng nghỉ (phút)",
+      "showAdvanced": "Nâng cao",
+      "hideAdvanced": "Ẩn nâng cao",
+      "addBtn": "Thêm quy tắc",
+      "cooldownShort": "nghỉ {{m}} phút"
+    }
+  },
   "common": {
     "welcome": "Chào mừng đến với SWTIS",
     "loading": "Đang tải...",
@@ -105,6 +157,8 @@
     "theme": "Giao diện",
     "profile": "Hồ sơ",
     "cancel": "Hủy",
+    "close": "Đóng",
+    "refresh": "Làm mới",
     "viewAll": "Xem tất cả",
     "minutes": "phút",
     "hours": "giờ",
