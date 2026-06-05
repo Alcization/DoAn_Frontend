@@ -30,6 +30,7 @@ export default function CurrentWeatherDetail({ selectedLocation }: CurrentWeathe
   
   const { adaptCurrentWeather } = useWeatherAdapter();
 
+  // Cấu hình API
   const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
   const LAT = 10.7626; // Vĩ độ TP.HCM
   const LON = 106.6602; // Kinh độ TP.HCM

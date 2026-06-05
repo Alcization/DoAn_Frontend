@@ -33,7 +33,7 @@ export default function AlertSettingModal({ isOpen, onClose, area, onSave }: Ale
 
       // Initialize from existing area/local settings first
       setTempEnabled(area.tempAlertEnabled ?? false);
-      setTempThreshold(area.tempThreshold ?? 35);
+      setTempThreshold(area.tempThreshold ?? 36);
       setRainEnabled(area.rainAlertEnabled ?? false);
       setRainThreshold(area.rainThreshold ?? 50);
 

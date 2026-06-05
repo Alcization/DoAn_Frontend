@@ -9,6 +9,7 @@ export default function HourlyForecast() {
   const [forecastData, setForecastData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Cấu hình API Pro
   const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
   const LAT = 10.7626;
   const LON = 106.6602;

@@ -14,7 +14,7 @@ export default function WeekForecastList({ selectedLocation }: CurrentWeatherDet
   const [loading, setLoading] = useState(true);
 
   const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
-  const LAT = 10.7626;
+  const LAT = 10.7626; 
   const LON = 106.6602;
   const CNT = 7;
 
