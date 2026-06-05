@@ -119,9 +119,9 @@ export function useSignupForm() {
           username: generatedUsername,
           email: formData.email,
           password: formData.password,
-          fullName: formData.fullName, 
-          accountType: formData.role, 
-          roles: ["user"] 
+          fullName: formData.fullName,
+          accountType: formData.role,
+          roles: ["user"]
         }),
       });
 

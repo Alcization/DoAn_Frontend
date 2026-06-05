@@ -13,7 +13,7 @@ export const RiskTimeSelect = ({ time, updateField }: RiskTimeSelectProps) => {
   const { t } = useTranslation();
   
   const currentHour = new Date().getHours();
-  const availableHours = Array.from({ length: 6 }, (_, i) => (currentHour + i + 1) % 24);
+  const availableHours = Array.from({ length: 24 }, (_, i) => (currentHour + i + 1) % 24);
 
   return (
     <div className="flex flex-col gap-2 sm:col-span-2">
@@ -29,10 +29,13 @@ export const RiskTimeSelect = ({ time, updateField }: RiskTimeSelectProps) => {
           <option value="" disabled>{t("businessReports.risk.time")}</option>
           {availableHours.map((hour) => {
             const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-            const isTomorrow = hour < currentHour;
+            const isTomorrow = hour <= currentHour;
+            const dayLabel = isTomorrow
+              ? t("businessReports.risk.tomorrow")
+              : t("businessReports.risk.today");
             return (
               <option key={timeStr} value={timeStr}>
-                {timeStr} {hour >= 12 ? 'PM' : 'AM'} {isTomorrow ? `(Tomorrow)` : `(Today)`}
+                {timeStr} ({dayLabel})
               </option>
             );
           })}
